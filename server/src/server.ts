@@ -14,9 +14,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/';
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173'
-}));
+app.use(cors());
 app.use(express.json());
 
 // Rate limiting
