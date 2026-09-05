@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "name": "Property Valuation Rules",
+  "active": true,
+  "constants": {
+    "buildingValuationFactor": 0.24,
+    "bighaToSqFt": 14400,
+    "khathaToSqFt": 720,
+    "chatakToSqFt": 45,
+    "minimumValuation": 1150,
+    "commercialSurchargePercent": 20
+  },
+  "scoreLookup": [
+    { "code": "Z1", "description": "ZONE1", "value": 5, "type": "zone" },
+    { "code": "Z2", "description": "ZONE2", "value": 3, "type": "zone" },
+    { "code": "Z3", "description": "ZONE3", "value": 1, "type": "zone" },
+    { "code": "R1", "description": "RENTED<10Y", "value": 20, "type": "usage" },
+    { "code": "R2", "description": "RENTED>10Y", "value": 10, "type": "usage" },
+    { "code": "R3", "description": "RESIDENTIAL", "value": 2, "type": "usage" },
+    { "code": "R4", "description": "PUBLIC UTILITY", "value": 0, "type": "usage" },
+    { "code": "I", "description": "INDUSTRY", "value": 80, "type": "commercial" },
+    { "code": "M", "description": "MERCANTILE", "value": 100, "type": "commercial" },
+    { "code": "C1", "description": "HIGH COMMERCIAL", "value": 50, "type": "commercial" },
+    { "code": "C2", "description": "MEDIUM COMMERCIAL", "value": 30, "type": "commercial" },
+    { "code": "C3", "description": "LOW COMMERCIAL", "value": 15, "type": "commercial" },
+    { "code": "H1", "description": "R1+C1", "value": 40, "type": "combined" },
+    { "code": "H2", "description": "R1+C2", "value": 30, "type": "combined" },
+    { "code": "H3", "description": "R1+C3", "value": 22.5, "type": "combined" },
+    { "code": "H4", "description": "R2+C1", "value": 32.5, "type": "combined" },
+    { "code": "H5", "description": "R2+C2", "value": 22.5, "type": "combined" },
+    { "code": "H6", "description": "R2+C3", "value": 15, "type": "combined" },
+    { "code": "H7", "description": "R3+C1", "value": 26, "type": "combined" },
+    { "code": "H8", "description": "R3+C2", "value": 16, "type": "combined" },
+    { "code": "H9", "description": "R3+C3", "value": 8.5, "type": "combined" },
+    { "code": "CC1", "description": "MARBLE", "value": 7, "type": "construction" },
+    { "code": "CC2", "description": "MOSAIC", "value": 6, "type": "construction" },
+    { "code": "CC3", "description": "MOSAIC+PUCCA", "value": 6, "type": "construction" },
+    { "code": "CC4", "description": "PUCCA", "value": 4, "type": "construction" },
+    { "code": "CC5", "description": "PUCCA+TINY", "value": 2, "type": "construction" },
+    { "code": "CC6", "description": "TINY", "value": 1, "type": "construction" },
+    { "code": "CC7", "description": "SHANTIES", "value": 0.5, "type": "construction" }
+  ],
+  "landZoneRatesPerKhatha": [
+    { "code": "Z1", "description": "ZONE1 LAND", "value": 1000000 },
+    { "code": "Z2", "description": "ZONE2 LAND", "value": 600000 },
+    { "code": "Z3", "description": "ZONE3 LAND", "value": 200000 }
+  ],
+  "mainLandSlabs": [
+    { "minExclusive": null, "maxInclusive": 7200, "formula": "0" },
+    { "minExclusive": 7200, "maxInclusive": 14400, "formula": "(totalLandSqFt - 7200) * 0.24" },
+    { "minExclusive": 14400, "maxInclusive": 28800, "formula": "(totalLandSqFt - 14400) * 0.24 * 0.75 + 1728" },
+    { "minExclusive": 28800, "maxInclusive": 43200, "formula": "(totalLandSqFt - 28800) * 0.24 * 0.50 + 4320" },
+    { "minExclusive": 43200, "maxInclusive": null, "formula": "(totalLandSqFt - 43200) * 0.24 * 0.25 + 6048" }
+  ],
+  "standaloneLandSlabs": [
+    { "condition": "totalLandSqFt <= 7200", "formula": "MROUND(actualCostPerSqFt * totalLandSqFt, 10)" },
+    { "condition": "7200 < totalLandSqFt <= 14400", "formula": "MROUND(10000 + (totalLandSqFt - 7200) * actualCostPerSqFt * 0.75, 10)" },
+    { "condition": "14400 < totalLandSqFt <= 43200", "formula": "MROUND(17500 + (totalLandSqFt - 14400) * actualCostPerSqFt * 0.50, 10)" },
+    { "condition": "totalLandSqFt > 43200", "formula": "MROUND(37500 + (totalLandSqFt - 43200) * actualCostPerSqFt * 0.25, 10)" }
+  ],
+  "createdAt": "2026-09-05T13:42:00.000Z",
+  "updatedAt": "2026-09-05T13:42:00.000Z"
+}
