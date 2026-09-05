@@ -40,7 +40,7 @@ const PropertyValuation = () => {
   const [saving, setSaving] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useRHForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       coverAreaSqFt: 0,
       buildingAgeYears: 0,
@@ -56,7 +56,7 @@ const PropertyValuation = () => {
         setRules(res.data.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setError('Failed to load valuation rules. Ensure database is seeded and running.');
         setLoading(false);
       });
@@ -110,7 +110,7 @@ const PropertyValuation = () => {
       <div className="flex-1 space-y-6">
         <h1 className="text-2xl font-bold text-slate-900">Property Valuation Calculator</h1>
         
-        <form id="valuation-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form id="valuation-form" onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
           
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Property Details (Optional)</h2>

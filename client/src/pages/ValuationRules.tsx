@@ -12,7 +12,7 @@ const ValuationRules = () => {
         setRules(res.data.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setLoading(false);
       });
   }, []);

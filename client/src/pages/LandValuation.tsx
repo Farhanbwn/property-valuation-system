@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
-import { Map, Calculator, AlertCircle } from 'lucide-react';
+import { Map, Calculator } from 'lucide-react';
 
 const formSchema = z.object({
   zone: z.string().min(1, 'Zone is required'),
@@ -24,7 +24,7 @@ const LandValuation = () => {
   const [liveResult, setLiveResult] = useState<any>(null);
 
   const { register, watch, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       landType: 'NORMAL',
       landArea: { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
@@ -39,7 +39,7 @@ const LandValuation = () => {
         setRules(res.data.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setLoading(false);
       });
   }, []);

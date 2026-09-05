@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { valuationService } from '../services/api';
 import { Link } from 'react-router-dom';
-import { Eye, Printer, Trash2 } from 'lucide-react';
+import { Eye, Trash2 } from 'lucide-react';
 
 const ValuationHistory = () => {
   const [records, setRecords] = useState<any[]>([]);
