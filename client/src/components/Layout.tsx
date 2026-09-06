@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Calculator, Map, History, Settings, Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import Header from './Header';
 
 const Layout = () => {
   const location = useLocation();
@@ -46,7 +47,7 @@ const Layout = () => {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 w-64 bg-secondary text-white no-print z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 hidden md:block">
-          <h1 className="text-xl font-bold tracking-tight text-white">Score & Valuation</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white">Burdwan Property & land valuation Calculator</h1>
           <p className="text-slate-400 text-sm mt-1">Property Calculator</p>
         </div>
         <nav className="mt-6">
@@ -90,9 +91,14 @@ const Layout = () => {
         </div>
       </aside>
 
-      <main className="flex-1 p-4 md:p-10 overflow-y-auto w-full max-w-full">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <Header />
+        <main className="flex-1 overflow-y-auto w-full max-w-full flex flex-col">
+          <div className="p-4 md:p-10 flex-1">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

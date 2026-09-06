@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -42,9 +44,14 @@ const Login = () => {
   };
 
   return (
-    <PageContainer>
-      <StyledWrapper>
-        <div className="wrapper">
+    <div className="flex flex-col bg-slate-50 min-h-screen">
+      <HeroSection>
+        <div className="w-full z-20">
+          <Header />
+        </div>
+        <div className="flex-1 flex items-center justify-center w-full z-10 p-4 min-h-[500px] py-8">
+          <StyledWrapper>
+          <div className="wrapper">
           <div className="card-switch">
             <label className="switch">
               <input type="checkbox" className="toggle" checked={!isLogin} onChange={() => setIsLogin(!isLogin)} />
@@ -83,9 +90,14 @@ const Login = () => {
               </div>
             </label>
           </div>
-        </div>
-      </StyledWrapper>
-    </PageContainer>
+          </div>
+        </StyledWrapper>
+      </div>
+      </HeroSection>
+      <div className="w-full z-20 bg-white">
+        <Footer />
+      </div>
+    </div>
   );
 }
 
@@ -97,13 +109,13 @@ const ErrorText = styled.p`
   max-width: 250px;
 `;
 
-const PageContainer = styled.div`
+const HeroSection = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 
   &::before {
     content: "";

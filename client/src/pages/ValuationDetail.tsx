@@ -63,10 +63,18 @@ const ValuationDetail = () => {
               <h3 className="font-semibold text-slate-700 mb-3 print:mb-2 flex items-center uppercase tracking-wider text-xs">
                 <Building2 className="w-4 h-4 mr-2" /> Property Details
               </h3>
-              <div className="space-y-2 print:space-y-1">
-                <p><span className="text-slate-500 inline-block w-24">Holding No:</span> <span className="font-medium text-slate-900">{record.property.holdingNumber || 'N/A'}</span></p>
-                <p><span className="text-slate-500 inline-block w-24">Owner:</span> <span className="font-medium text-slate-900">{record.property.ownerName || 'N/A'}</span></p>
-                <p><span className="text-slate-500 inline-block w-24">Address:</span> <span className="text-slate-900">{record.property.address || 'N/A'}</span></p>
+              <div className="grid grid-cols-2 gap-4 print:gap-2">
+                <div className="space-y-2 print:space-y-1">
+                  <p><span className="text-slate-500 block text-xs">Holding No</span> <span className="font-medium text-slate-900">{record.property.holdingNumber || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">Owner Name</span> <span className="font-medium text-slate-900">{record.property.ownerName || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">Location</span> <span className="text-slate-900">{record.property.location || 'N/A'}</span></p>
+                </div>
+                <div className="space-y-2 print:space-y-1">
+                  <p><span className="text-slate-500 block text-xs">District</span> <span className="text-slate-900">{record.property.district || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">ULB Name</span> <span className="text-slate-900">{record.property.ulbName || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">Ward No</span> <span className="text-slate-900">{record.property.ward || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">Assessment Date</span> <span className="text-slate-900">{record.property.assessmentDate ? new Date(record.property.assessmentDate).toLocaleDateString() : 'N/A'}</span></p>
+                </div>
               </div>
             </div>
             <div>
