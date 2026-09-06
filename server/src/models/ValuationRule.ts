@@ -32,6 +32,17 @@ export interface IValuationRule extends Document {
     condition: string;
     formula: string;
   }>;
+  locationData: {
+    ULB_Name: string;
+    district: string;
+    totalWards: number;
+    wardsIncluded: number;
+    wards: Array<{
+      ward: number;
+      locations: string[];
+    }>;
+    totalLocations: number;
+  };
 }
 
 const ValuationRuleSchema = new Schema(
@@ -75,6 +86,19 @@ const ValuationRuleSchema = new Schema(
         formula: { type: String, required: true },
       },
     ],
+    locationData: {
+      ULB_Name: { type: String, required: true },
+      district: { type: String, required: true },
+      totalWards: { type: Number, required: true },
+      wardsIncluded: { type: Number, required: true },
+      wards: [
+        {
+          ward: { type: Number, required: true },
+          locations: [{ type: String }],
+        },
+      ],
+      totalLocations: { type: Number, required: true },
+    },
   },
   { timestamps: true }
 );

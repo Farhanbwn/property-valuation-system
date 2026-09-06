@@ -8,8 +8,12 @@ import { useNavigate } from 'react-router-dom';
 
 const formSchema = z.object({
   propertyDetails: z.object({
-    holdingNumber: z.string().optional(),
     ownerName: z.string().optional(),
+    district: z.string().optional(),
+    ulbName: z.string().optional(),
+    ward: z.coerce.number().optional(),
+    location: z.string().optional(),
+    holdingNumber: z.string().optional(),
     address: z.string().optional(),
     assessmentDate: z.string().optional(),
     notes: z.string().optional()
@@ -39,9 +43,13 @@ const PropertyValuation = () => {
   const [calculating, setCalculating] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useRHForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useRHForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
+      propertyDetails: {
+        district: 'Purba Bardhaman',
+        ulbName: 'Burdwan Municipality'
+      },
       coverAreaSqFt: 0,
       buildingAgeYears: 0,
       landArea: { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
@@ -61,6 +69,11 @@ const PropertyValuation = () => {
         setLoading(false);
       });
   }, []);
+
+  const selectedWard = watch('propertyDetails.ward');
+  useEffect(() => {
+    setValue('propertyDetails.location', '');
+  }, [selectedWard, setValue]);
 
   useEffect(() => {
     if (
@@ -113,16 +126,49 @@ const PropertyValuation = () => {
         <form id="valuation-form" onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
           
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Property Details (Optional)</h2>
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Property Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Holding Number</label>
-                <input type="text" {...register('propertyDetails.holdingNumber')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
-              </div>
-              <div>
+              
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
                 <input type="text" {...register('propertyDetails.ownerName')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">District</label>
+                <input type="text" {...register('propertyDetails.district')} disabled className="w-full rounded-md border-slate-300 shadow-sm bg-slate-100 text-slate-500 p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">ULB Name</label>
+                <input type="text" {...register('propertyDetails.ulbName')} disabled className="w-full rounded-md border-slate-300 shadow-sm bg-slate-100 text-slate-500 p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Ward</label>
+                <select {...register('propertyDetails.ward')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border bg-white">
+                  <option value="">Select Ward...</option>
+                  {rules?.locationData?.wards.map((w: any) => (
+                    <option key={w.ward} value={w.ward}>Ward {w.ward}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                <select {...register('propertyDetails.location')} disabled={!selectedWard} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border bg-white disabled:bg-slate-100">
+                  <option value="">Select Location...</option>
+                  {selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Holding Number</label>
+                <input type="text" {...register('propertyDetails.holdingNumber')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
             </div>
           </div>
 

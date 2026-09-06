@@ -5,6 +5,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import valuationRoutes from './routes/valuation.routes';
+import authRoutes from './routes/authRoutes';
+import { User } from './models/User';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -25,6 +28,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/valuations', valuationRoutes);
 
 // Health check
@@ -34,8 +38,26 @@ app.get('/api/health', (req, res) => {
 
 // Database connection
 mongoose.connect(MONGODB_URI)
-  .then(() => {
+  .then(async () => {
     console.log('Connected to MongoDB');
+    
+    // Seed admin user
+    try {
+      const adminExists = await User.findOne({ email: 'Admin@bwnpvc.com' });
+      if (!adminExists) {
+        const passwordHash = await bcrypt.hash('Admin@NC_9232', 10);
+        await User.create({
+          name: 'Admin',
+          email: 'Admin@bwnpvc.com',
+          passwordHash,
+          role: 'admin'
+        });
+        console.log('Admin user seeded');
+      }
+    } catch (e) {
+      console.error('Failed to seed admin user', e);
+    }
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

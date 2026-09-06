@@ -36,7 +36,8 @@ async function seed() {
       scoreLookup: rulesData.scoreLookup,
       landZoneRatesPerKhatha: rulesData.landZoneRatesPerKhatha,
       mainLandSlabs: rulesData.mainLandSlabs,
-      standaloneLandSlabs: rulesData.standaloneLandSlabs
+      standaloneLandSlabs: rulesData.standaloneLandSlabs,
+      locationData: rulesData.locationData
     });
 
     // Deactivate any existing active rules

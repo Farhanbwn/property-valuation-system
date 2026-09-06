@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthRequest } from '../middleware/auth';
 import { ValuationRule } from '../models/ValuationRule';
 import { ValuationRecord } from '../models/ValuationRecord';
 import { ValuationService } from '../services/valuation.service';
@@ -43,7 +44,7 @@ export const calculatePropertyValuation = async (req: Request, res: Response) =>
   }
 };
 
-export const savePropertyValuation = async (req: Request, res: Response) => {
+export const savePropertyValuation = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = propertyValuationInputSchema.parse(req.body);
     const rules = await ValuationRule.findOne({ active: true });
@@ -55,6 +56,7 @@ export const savePropertyValuation = async (req: Request, res: Response) => {
     const result = ValuationService.calculateFullPropertyValuation(validatedData, rules, 'excel-strict');
     
     const record = new ValuationRecord({
+      userId: req.user?.id,
       property: validatedData.propertyDetails,
       inputs: {
         coverAreaSqFt: validatedData.coverAreaSqFt,
@@ -103,18 +105,23 @@ export const savePropertyValuation = async (req: Request, res: Response) => {
   }
 };
 
-export const getValuationHistory = async (req: Request, res: Response) => {
+export const getValuationHistory = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const records = await ValuationRecord.find()
+    const query: any = {};
+    if (req.user?.role !== 'admin') {
+      query.userId = req.user?.id;
+    }
+
+    const records = await ValuationRecord.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
       
-    const total = await ValuationRecord.countDocuments();
+    const total = await ValuationRecord.countDocuments(query);
 
     res.json({
       success: true,
@@ -131,24 +138,35 @@ export const getValuationHistory = async (req: Request, res: Response) => {
   }
 };
 
-export const getValuationById = async (req: Request, res: Response) => {
+export const getValuationById = async (req: AuthRequest, res: Response) => {
   try {
     const record = await ValuationRecord.findById(req.params.id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Valuation not found.' });
     }
+    
+    if (req.user?.role !== 'admin' && record.userId.toString() !== req.user?.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
     res.json({ success: true, data: record });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-export const deleteValuation = async (req: Request, res: Response) => {
+export const deleteValuation = async (req: AuthRequest, res: Response) => {
   try {
-    const record = await ValuationRecord.findByIdAndDelete(req.params.id);
+    const record = await ValuationRecord.findById(req.params.id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Valuation not found.' });
     }
+
+    if (req.user?.role !== 'admin' && record.userId.toString() !== req.user?.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
+    await record.deleteOne();
     res.json({ success: true, message: 'Valuation deleted successfully.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

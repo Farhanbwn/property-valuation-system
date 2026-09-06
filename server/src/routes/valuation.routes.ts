@@ -8,8 +8,12 @@ import {
   deleteValuation, 
   calculateStandaloneLandValuation 
 } from '../controllers/valuation.controller';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
+
+router.use(authenticate);
+
 
 router.get('/rules', getActiveRules);
 router.post('/calculate', calculatePropertyValuation);

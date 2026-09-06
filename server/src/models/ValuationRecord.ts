@@ -1,10 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IValuationRecord extends Document {
+  userId: mongoose.Types.ObjectId;
   property: {
     holdingNumber?: string;
     ownerName?: string;
     address?: string;
+    district?: string;
+    ulbName?: string;
+    ward?: number;
+    location?: string;
     assessmentDate?: Date;
     notes?: string;
   };
@@ -47,10 +52,15 @@ export interface IValuationRecord extends Document {
 
 const ValuationRecordSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     property: {
       holdingNumber: { type: String },
       ownerName: { type: String },
       address: { type: String },
+      district: { type: String },
+      ulbName: { type: String },
+      ward: { type: Number },
+      location: { type: String },
       assessmentDate: { type: Date },
       notes: { type: String },
     },

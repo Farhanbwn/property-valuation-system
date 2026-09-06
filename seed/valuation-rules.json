@@ -11,53 +11,736 @@
     "commercialSurchargePercent": 20
   },
   "scoreLookup": [
-    { "code": "Z1", "description": "ZONE1", "value": 5, "type": "zone" },
-    { "code": "Z2", "description": "ZONE2", "value": 3, "type": "zone" },
-    { "code": "Z3", "description": "ZONE3", "value": 1, "type": "zone" },
-    { "code": "R1", "description": "RENTED<10Y", "value": 20, "type": "usage" },
-    { "code": "R2", "description": "RENTED>10Y", "value": 10, "type": "usage" },
-    { "code": "R3", "description": "RESIDENTIAL", "value": 2, "type": "usage" },
-    { "code": "R4", "description": "PUBLIC UTILITY", "value": 0, "type": "usage" },
-    { "code": "I", "description": "INDUSTRY", "value": 80, "type": "commercial" },
-    { "code": "M", "description": "MERCANTILE", "value": 100, "type": "commercial" },
-    { "code": "C1", "description": "HIGH COMMERCIAL", "value": 50, "type": "commercial" },
-    { "code": "C2", "description": "MEDIUM COMMERCIAL", "value": 30, "type": "commercial" },
-    { "code": "C3", "description": "LOW COMMERCIAL", "value": 15, "type": "commercial" },
-    { "code": "H1", "description": "R1+C1", "value": 40, "type": "combined" },
-    { "code": "H2", "description": "R1+C2", "value": 30, "type": "combined" },
-    { "code": "H3", "description": "R1+C3", "value": 22.5, "type": "combined" },
-    { "code": "H4", "description": "R2+C1", "value": 32.5, "type": "combined" },
-    { "code": "H5", "description": "R2+C2", "value": 22.5, "type": "combined" },
-    { "code": "H6", "description": "R2+C3", "value": 15, "type": "combined" },
-    { "code": "H7", "description": "R3+C1", "value": 26, "type": "combined" },
-    { "code": "H8", "description": "R3+C2", "value": 16, "type": "combined" },
-    { "code": "H9", "description": "R3+C3", "value": 8.5, "type": "combined" },
-    { "code": "CC1", "description": "MARBLE", "value": 7, "type": "construction" },
-    { "code": "CC2", "description": "MOSAIC", "value": 6, "type": "construction" },
-    { "code": "CC3", "description": "MOSAIC+PUCCA", "value": 6, "type": "construction" },
-    { "code": "CC4", "description": "PUCCA", "value": 4, "type": "construction" },
-    { "code": "CC5", "description": "PUCCA+TINY", "value": 2, "type": "construction" },
-    { "code": "CC6", "description": "TINY", "value": 1, "type": "construction" },
-    { "code": "CC7", "description": "SHANTIES", "value": 0.5, "type": "construction" }
+    {
+      "code": "Z1",
+      "description": "ZONE1",
+      "value": 5,
+      "type": "zone"
+    },
+    {
+      "code": "Z2",
+      "description": "ZONE2",
+      "value": 3,
+      "type": "zone"
+    },
+    {
+      "code": "Z3",
+      "description": "ZONE3",
+      "value": 1,
+      "type": "zone"
+    },
+    {
+      "code": "R1",
+      "description": "RENTED<10Y",
+      "value": 20,
+      "type": "usage"
+    },
+    {
+      "code": "R2",
+      "description": "RENTED>10Y",
+      "value": 10,
+      "type": "usage"
+    },
+    {
+      "code": "R3",
+      "description": "RESIDENTIAL",
+      "value": 2,
+      "type": "usage"
+    },
+    {
+      "code": "R4",
+      "description": "PUBLIC UTILITY",
+      "value": 0,
+      "type": "usage"
+    },
+    {
+      "code": "I",
+      "description": "INDUSTRY",
+      "value": 80,
+      "type": "commercial"
+    },
+    {
+      "code": "M",
+      "description": "MERCANTILE",
+      "value": 100,
+      "type": "commercial"
+    },
+    {
+      "code": "C1",
+      "description": "HIGH COMMERCIAL",
+      "value": 50,
+      "type": "commercial"
+    },
+    {
+      "code": "C2",
+      "description": "MEDIUM COMMERCIAL",
+      "value": 30,
+      "type": "commercial"
+    },
+    {
+      "code": "C3",
+      "description": "LOW COMMERCIAL",
+      "value": 15,
+      "type": "commercial"
+    },
+    {
+      "code": "H1",
+      "description": "R1+C1",
+      "value": 40,
+      "type": "combined"
+    },
+    {
+      "code": "H2",
+      "description": "R1+C2",
+      "value": 30,
+      "type": "combined"
+    },
+    {
+      "code": "H3",
+      "description": "R1+C3",
+      "value": 22.5,
+      "type": "combined"
+    },
+    {
+      "code": "H4",
+      "description": "R2+C1",
+      "value": 32.5,
+      "type": "combined"
+    },
+    {
+      "code": "H5",
+      "description": "R2+C2",
+      "value": 22.5,
+      "type": "combined"
+    },
+    {
+      "code": "H6",
+      "description": "R2+C3",
+      "value": 15,
+      "type": "combined"
+    },
+    {
+      "code": "H7",
+      "description": "R3+C1",
+      "value": 26,
+      "type": "combined"
+    },
+    {
+      "code": "H8",
+      "description": "R3+C2",
+      "value": 16,
+      "type": "combined"
+    },
+    {
+      "code": "H9",
+      "description": "R3+C3",
+      "value": 8.5,
+      "type": "combined"
+    },
+    {
+      "code": "CC1",
+      "description": "MARBLE",
+      "value": 7,
+      "type": "construction"
+    },
+    {
+      "code": "CC2",
+      "description": "MOSAIC",
+      "value": 6,
+      "type": "construction"
+    },
+    {
+      "code": "CC3",
+      "description": "MOSAIC+PUCCA",
+      "value": 6,
+      "type": "construction"
+    },
+    {
+      "code": "CC4",
+      "description": "PUCCA",
+      "value": 4,
+      "type": "construction"
+    },
+    {
+      "code": "CC5",
+      "description": "PUCCA+TINY",
+      "value": 2,
+      "type": "construction"
+    },
+    {
+      "code": "CC6",
+      "description": "TINY",
+      "value": 1,
+      "type": "construction"
+    },
+    {
+      "code": "CC7",
+      "description": "SHANTIES",
+      "value": 0.5,
+      "type": "construction"
+    }
   ],
   "landZoneRatesPerKhatha": [
-    { "code": "Z1", "description": "ZONE1 LAND", "value": 1000000 },
-    { "code": "Z2", "description": "ZONE2 LAND", "value": 600000 },
-    { "code": "Z3", "description": "ZONE3 LAND", "value": 200000 }
+    {
+      "code": "Z1",
+      "description": "ZONE1 LAND",
+      "value": 1000000
+    },
+    {
+      "code": "Z2",
+      "description": "ZONE2 LAND",
+      "value": 600000
+    },
+    {
+      "code": "Z3",
+      "description": "ZONE3 LAND",
+      "value": 200000
+    }
   ],
   "mainLandSlabs": [
-    { "minExclusive": null, "maxInclusive": 7200, "formula": "0" },
-    { "minExclusive": 7200, "maxInclusive": 14400, "formula": "(totalLandSqFt - 7200) * 0.24" },
-    { "minExclusive": 14400, "maxInclusive": 28800, "formula": "(totalLandSqFt - 14400) * 0.24 * 0.75 + 1728" },
-    { "minExclusive": 28800, "maxInclusive": 43200, "formula": "(totalLandSqFt - 28800) * 0.24 * 0.50 + 4320" },
-    { "minExclusive": 43200, "maxInclusive": null, "formula": "(totalLandSqFt - 43200) * 0.24 * 0.25 + 6048" }
+    {
+      "minExclusive": null,
+      "maxInclusive": 7200,
+      "formula": "0"
+    },
+    {
+      "minExclusive": 7200,
+      "maxInclusive": 14400,
+      "formula": "(totalLandSqFt - 7200) * 0.24"
+    },
+    {
+      "minExclusive": 14400,
+      "maxInclusive": 28800,
+      "formula": "(totalLandSqFt - 14400) * 0.24 * 0.75 + 1728"
+    },
+    {
+      "minExclusive": 28800,
+      "maxInclusive": 43200,
+      "formula": "(totalLandSqFt - 28800) * 0.24 * 0.50 + 4320"
+    },
+    {
+      "minExclusive": 43200,
+      "maxInclusive": null,
+      "formula": "(totalLandSqFt - 43200) * 0.24 * 0.25 + 6048"
+    }
   ],
   "standaloneLandSlabs": [
-    { "condition": "totalLandSqFt <= 7200", "formula": "MROUND(actualCostPerSqFt * totalLandSqFt, 10)" },
-    { "condition": "7200 < totalLandSqFt <= 14400", "formula": "MROUND(10000 + (totalLandSqFt - 7200) * actualCostPerSqFt * 0.75, 10)" },
-    { "condition": "14400 < totalLandSqFt <= 43200", "formula": "MROUND(17500 + (totalLandSqFt - 14400) * actualCostPerSqFt * 0.50, 10)" },
-    { "condition": "totalLandSqFt > 43200", "formula": "MROUND(37500 + (totalLandSqFt - 43200) * actualCostPerSqFt * 0.25, 10)" }
+    {
+      "condition": "totalLandSqFt <= 7200",
+      "formula": "MROUND(actualCostPerSqFt * totalLandSqFt, 10)"
+    },
+    {
+      "condition": "7200 < totalLandSqFt <= 14400",
+      "formula": "MROUND(10000 + (totalLandSqFt - 7200) * actualCostPerSqFt * 0.75, 10)"
+    },
+    {
+      "condition": "14400 < totalLandSqFt <= 43200",
+      "formula": "MROUND(17500 + (totalLandSqFt - 14400) * actualCostPerSqFt * 0.50, 10)"
+    },
+    {
+      "condition": "totalLandSqFt > 43200",
+      "formula": "MROUND(37500 + (totalLandSqFt - 43200) * actualCostPerSqFt * 0.25, 10)"
+    }
   ],
   "createdAt": "2026-09-05T13:42:00.000Z",
-  "updatedAt": "2026-09-05T13:42:00.000Z"
+  "updatedAt": "2026-09-05T13:42:00.000Z",
+  "locationData": {
+    "ULB_Name": "Burdwan Municipality",
+    "district": "Purba Bardhaman",
+    "totalWards": 35,
+    "wardsIncluded": 35,
+    "wards": [
+      {
+        "ward": 1,
+        "locations": [
+          "B S PARA",
+          "G T ROAD",
+          "KESHABGANJ",
+          "KHAGRA GARIA"
+        ]
+      },
+      {
+        "ward": 2,
+        "locations": [
+          "AFTAB AVENUE",
+          "AFTAB AVENUE HATATH COLONY",
+          "B S BAGDI PARA",
+          "B S PARA",
+          "BABURBAG",
+          "GURUDASI PARA",
+          "RAJDISPENSARY ROAD",
+          "RANI SAGAR GHAT NO -2"
+        ]
+      },
+      {
+        "ward": 3,
+        "locations": [
+          "B B GHOSH ROAD",
+          "B S ROAD",
+          "G T ROAD",
+          "ICHLABAZAR",
+          "J B HAZRA ROAD",
+          "MEHEDI BAGAN",
+          "RAM KRISHNA ROAD",
+          "RASIKPUR"
+        ]
+      },
+      {
+        "ward": 4,
+        "locations": [
+          "DUBRAJ",
+          "HARER DANGA",
+          "KATWA ROAD"
+        ]
+      },
+      {
+        "ward": 5,
+        "locations": [
+          "DUBRAJ",
+          "HARER DANGA",
+          "KATWA ROAD",
+          "SADHANPUR",
+          "SADHANPUR ROAD"
+        ]
+      },
+      {
+        "ward": 6,
+        "locations": [
+          "KHANPUKUR (BHADRAPALLI)",
+          "KHANPUKUR (GOLGHAR)",
+          "NARI",
+          "SADHANPUR ROAD",
+          "SIB SANKAR COLONI",
+          "SODHPUR",
+          "SOSKI"
+        ]
+      },
+      {
+        "ward": 7,
+        "locations": [
+          "B B GHOSH ROAD",
+          "D N GANGULI LANE",
+          "G N MITRA LANE",
+          "G T ROAD",
+          "GOODSHED ROAD",
+          "K B 1ST LANE",
+          "K B 2ND LANE",
+          "K B CENTRAL MAIN ROAD",
+          "K B CHANDMARI 2ND BYE LANE",
+          "K B CHANDMARI BYE LANE",
+          "K B CHANDMARY MAIN ROAD",
+          "K B CHOWDHURY BYE LANE",
+          "KALITALA LANE",
+          "KALNA ROAD",
+          "MAHENDRA PANDIT LANE",
+          "MD YASIN ROAD",
+          "P C MITRA LANE",
+          "RAM KRISHNA ROAD"
+        ]
+      },
+      {
+        "ward": 8,
+        "locations": [
+          "HAFIJULLAH BERH",
+          "KALIBAZAR",
+          "KALIBAZAR EAST LANE",
+          "KALNA ROAD"
+        ]
+      },
+      {
+        "ward": 9,
+        "locations": [
+          "BIRHATTA",
+          "G T ROAD",
+          "KACHARI ROAD",
+          "KALIBAZAR",
+          "KALIBAZAR EAST LANE",
+          "KALIBAZAR WEST LANE",
+          "KALNA ROAD",
+          "KALNA ROAD SOUTH",
+          "TOWN HALL"
+        ]
+      },
+      {
+        "ward": 10,
+        "locations": [
+          "BARABANE PARA",
+          "CHOTOBENE PARA",
+          "G T ROAD EAST END",
+          "ICHLABAZAR",
+          "SRIPALLY"
+        ]
+      },
+      {
+        "ward": 11,
+        "locations": [
+          "CHOTOBENE PARA",
+          "DINESH NAGAR COLONI",
+          "G T ROAD EAST END",
+          "ICHLABAZAR",
+          "KHUDIRAMPALLY",
+          "SIAL DANGA"
+        ]
+      },
+      {
+        "ward": 12,
+        "locations": [
+          "B N MADHYA PARA",
+          "B N NUTAN COLONI",
+          "BARANILPUR ARYA PALLY (NORTH)",
+          "BARANILPUR ARYA PALLY EAST",
+          "BARANILPUR SHAKTI PARA",
+          "BARANILPUR UTTAR PARA (NORTH PALLY)",
+          "G T ROAD EAST END",
+          "KANAINATSAL",
+          "KANAINATSAL EAST",
+          "KANAINATSAL NORTH",
+          "KANAINATSAL SOUTH",
+          "KANAINATSAL WEST",
+          "MEGHNAD COLONI",
+          "SANTIPARA"
+        ]
+      },
+      {
+        "ward": 13,
+        "locations": [
+          "BALI DANGA GOVT. COLONY",
+          "BALI DANGA NAZRUL PALLY",
+          "BARANILPUR AMBAGAN COLONI",
+          "BARANILPUR DAKSHIN SANTIPARA",
+          "BARANILPUR MEGHNAD COLONI",
+          "BARANILPUR RAJLAKSHMI COLONI",
+          "BARANILPUR SUKANTA PALLY",
+          "BECHARHAT (DAKHINAYAN)",
+          "BECHARHAT COLONI",
+          "BYE PASS ( NORTH )",
+          "CHOTONILPUR NUTAN COLONI",
+          "CHOTONILPUR SOUTH PARA",
+          "D V C",
+          "JAGATBERH (EAST)"
+        ]
+      },
+      {
+        "ward": 14,
+        "locations": [
+          "BARANILPUR KHELAR MATH",
+          "BARANILPUR SUHRID PALLY",
+          "CHOTOBALIDANGA",
+          "CHOTONILPUR MADHYA PARA",
+          "CHOTONILPUR SOUTH PARA",
+          "CHOTONILPUR WEST PARA",
+          "G T ROAD EAST END"
+        ]
+      },
+      {
+        "ward": 15,
+        "locations": [
+          "CHOTOBALIDANGA",
+          "CHOTONILPUR WEST PARA",
+          "DHAMRAI",
+          "G T ROAD EAST END",
+          "MEAR BERH",
+          "PARBIRHATA",
+          "SHANKARIPUKUR"
+        ]
+      },
+      {
+        "ward": 16,
+        "locations": [
+          "BERH SOUTH PARA",
+          "JAGATBERH",
+          "JAGATBERH (NORTH)",
+          "JAGATBERH (SURYA NAGAR)",
+          "MIRCHOBA-1",
+          "MIRCHOBA-2",
+          "MIRCHOBA-3",
+          "MIRCHOBA",
+          "NATUNGRAM",
+          "R B BASU SARAK",
+          "RABINDRA PALLY",
+          "S S P (N) DAKSHINAYAN",
+          "SADARGHAT BANDH ROAD",
+          "SADARGHAT BINOY PALLY",
+          "SADARGHAT R B BASU SARAK(EAST)",
+          "SADARGHAT SUKANTA PALLY"
+        ]
+      },
+      {
+        "ward": 17,
+        "locations": [
+          "ALAM GANJ",
+          "BERH EAST PARA",
+          "BERH NORTH PARA",
+          "BERH SOUTH PARA",
+          "BERH WEST PARA",
+          "BIDHAN PALLY",
+          "R B BASU SARAK",
+          "RABINDRA PALLY",
+          "RAGHUNATH PUR"
+        ]
+      },
+      {
+        "ward": 18,
+        "locations": [
+          "BARABALIDANGA",
+          "BHATCHALA",
+          "BONG PUR",
+          "CHOTOBALIDANGA",
+          "GOLAHAT"
+        ]
+      },
+      {
+        "ward": 19,
+        "locations": [
+          "GHORA SAHID LANE",
+          "M N GHOSH ROAD",
+          "N P NANDAY ROAD",
+          "PAIRA KHANA LANE",
+          "PIRBAHARAM",
+          "RAJCOLLEGIATE ROAD",
+          "SAHACHETAN",
+          "SHER AFGAN ROAD"
+        ]
+      },
+      {
+        "ward": 20,
+        "locations": [
+          "B C ROAD",
+          "B G NANDAY ROAD",
+          "BARABAZAR TALHATA",
+          "CHANDNICHACK",
+          "D N SARKAR LANE",
+          "JAHURI PATTY",
+          "N BASU ROAD",
+          "N P NANDAY ROAD",
+          "PAIRA KHANA LANE",
+          "PIRBAHARAM",
+          "SAHACHETAN",
+          "SHER AFGAN ROAD",
+          "SHYAMBAZAR"
+        ]
+      },
+      {
+        "ward": 21,
+        "locations": [
+          "A B MUKHERJEE ROAD",
+          "ATAMAHAL",
+          "CHELOMAHAL",
+          "CHELOPATI",
+          "D D TEWARI ROAD",
+          "DALPATI",
+          "DANGAPARA",
+          "DHOKRA SAHID",
+          "KAMALA KAMINI LANE",
+          "KANSARI MAHAL",
+          "NATUNGANG TALHATA",
+          "POGEYA MAHAL",
+          "RAJCOLLEGIATE ROAD"
+        ]
+      },
+      {
+        "ward": 22,
+        "locations": [
+          "ALAM GANJ",
+          "ALI GANJ",
+          "MOTIBAG",
+          "RAGHUNATH PUR",
+          "TARIBMAHAL",
+          "TEJGONJ"
+        ]
+      },
+      {
+        "ward": 23,
+        "locations": [
+          "MOTIBAG",
+          "RATHTALA",
+          "RATHTALA (AMBAGAN)",
+          "RATHTALA (EIT BHATA COLONY)",
+          "RATHTALA (KORA PARA)",
+          "RATHTALA (NATUN COLONY)",
+          "RATHTALA (PADMA PUKUR)"
+        ]
+      },
+      {
+        "ward": 24,
+        "locations": [
+          "BELPUSKORINY",
+          "GURAHATA",
+          "IDILPUR",
+          "KAMAR MAHAL",
+          "KANCHAN NAGAR PASCHIM PARA",
+          "KANCHAN NAGAR PURBO PARA",
+          "KHARGESHWAR",
+          "LABONGOLA",
+          "MIRJAPUR",
+          "PASARIMAHAL",
+          "PODDAR PARA",
+          "RAMPUR",
+          "SHANKARIPARA",
+          "TAMILIPARA",
+          "TELIPARA",
+          "UDAYPALLY"
+        ]
+      },
+      {
+        "ward": 25,
+        "locations": [
+          "BHUBANESWAR ROAD",
+          "BOREHAT",
+          "D D TEWARI ROAD",
+          "KAMALA KANTA KALIBARI LANE",
+          "KATRAPOTA",
+          "PAHARPUR",
+          "R B CHATTERJEE ROAD",
+          "RAJGANJ",
+          "SARAT PALLY",
+          "TIKARHAT"
+        ]
+      },
+      {
+        "ward": 26,
+        "locations": [
+          "GODA (CENTRAL)",
+          "GODA (EAST)",
+          "GODA (NORTH)",
+          "GODA (SOUTH)",
+          "GODA (WEST)",
+          "HAZIDANGA",
+          "KAJIRBERH",
+          "KAJIRHAT",
+          "KAMALNAGAR",
+          "PAHARPUR",
+          "R B CHATTERJEE ROAD",
+          "TIKARHAT"
+        ]
+      },
+      {
+        "ward": 27,
+        "locations": [
+          "BABURBAG",
+          "DHOBAPARA ROAD",
+          "HAJI POTA",
+          "KESHABGANJ",
+          "S C MOITRA ROAD",
+          "SHYAMLAL ROAD"
+        ]
+      },
+      {
+        "ward": 28,
+        "locations": [
+          "A B MUKHERJEE ROAD",
+          "B R MARWARY LANE",
+          "BOREHAT",
+          "CHELOPATI",
+          "D D TEWARI ROAD",
+          "DHOBAPARA ROAD",
+          "GOAL PUKUR",
+          "KAMALA KANTA KALIBARI LANE",
+          "KRISHNASAYAR",
+          "TIKARHAT"
+        ]
+      },
+      {
+        "ward": 29,
+        "locations": [
+          "1 NO B T LANE",
+          "2 NO B T LANE",
+          "3 NO B T LANE",
+          "4 NO B T LANE",
+          "AFTAB AVENUE",
+          "B C ROAD",
+          "HRISHIKESH CHATTERJEE LANE",
+          "J B MITRA ROAD",
+          "MAHAJANTULI ROAD",
+          "MITHA PUKUR ROAD",
+          "MITHAPUKUR LANE",
+          "NARKELBAGAN",
+          "RAJDISPENSARY ROAD",
+          "S C MOITRA ROAD",
+          "SHYAMLAL ROAD"
+        ]
+      },
+      {
+        "ward": 30,
+        "locations": [
+          "B B GHOSH ROAD",
+          "B C ROAD",
+          "B L CHOWDHURY ROAD",
+          "GURUDASI PARA",
+          "J N ROY ROAD",
+          "MAHAJANTULI ROAD",
+          "R B GHOSH ROAD",
+          "R C DAS ROAD",
+          "RAM KRISHNA ROAD"
+        ]
+      },
+      {
+        "ward": 31,
+        "locations": [
+          "B B GHOSH ROAD",
+          "B C ROAD",
+          "G T ROAD",
+          "LASKARDIGHI",
+          "M K CHATTERJEE LANE",
+          "MD YASIN ROAD",
+          "RANIGANJ BHITAR LANE",
+          "RANIGANJ BYE LANE"
+        ]
+      },
+      {
+        "ward": 32,
+        "locations": [
+          "2 NO MAHAJANTULI ROAD",
+          "A C MITRA LANE",
+          "B C ROAD",
+          "D N MITRA LANE",
+          "D P MAZUMDER LANE",
+          "J B MITRA ROAD",
+          "KHOSEBAGAN",
+          "MAHAJANTULI ROAD",
+          "R B GHOSH ROAD"
+        ]
+      },
+      {
+        "ward": 33,
+        "locations": [
+          "A L MITRA LANE",
+          "B C ROAD",
+          "D N SARKAR LANE",
+          "N BASU ROAD",
+          "N D KAYEM LANE",
+          "PILKHANA LANE",
+          "S C BANERJEE ROAD"
+        ]
+      },
+      {
+        "ward": 34,
+        "locations": [
+          "B C ROAD",
+          "B L HATI ROAD",
+          "G T ROAD",
+          "G T ROAD WEST LANE",
+          "K C BOSE LANE",
+          "MURATMAHAL",
+          "N BASU ROAD",
+          "PRATAPESWAR NURIPARA LANE",
+          "PRATAPESWAR SHIBTALA LANE",
+          "RADHA NAGAR MUSLIM PARA",
+          "RADHA NAGAR SOUTH",
+          "RAMLAL BOSE ROAD",
+          "SASHI BHUSAN BOSE ROAD"
+        ]
+      },
+      {
+        "ward": 35,
+        "locations": [
+          "BHATCHALA",
+          "BHATCHALA (PEON PARA)",
+          "GOLAHAT",
+          "PARBIRHATA"
+        ]
+      }
+    ],
+    "totalLocations": 315
+  }
 }

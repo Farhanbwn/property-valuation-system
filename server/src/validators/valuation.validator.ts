@@ -19,6 +19,10 @@ export const propertyValuationInputSchema = z.object({
     holdingNumber: z.string().optional(),
     ownerName: z.string().optional(),
     address: z.string().optional(),
+    district: z.string().optional(),
+    ulbName: z.string().optional(),
+    ward: z.coerce.number().optional(),
+    location: z.string().optional(),
     assessmentDate: z.string().optional(),
     notes: z.string().optional()
   }).optional()
