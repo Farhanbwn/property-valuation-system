@@ -48,11 +48,13 @@ const ValuationDetail = () => {
         <div className="p-8 print:p-4 border-b border-slate-200">
           <div className="flex justify-between items-start mb-6 print:mb-4">
             <div>
-              <h1 className="text-3xl print:text-2xl font-bold text-slate-900">PROPERTY VALUATION REPORT</h1>
+              <h1 className="text-3xl print:text-2xl font-bold text-slate-900">
+                {record.valuationType === 'LAND' ? 'STANDALONE LAND VALUATION REPORT' : 'PROPERTY VALUATION REPORT'}
+              </h1>
               <p className="text-slate-500 mt-1">ID: {record._id.substring(0, 8).toUpperCase()}</p>
             </div>
             <div className="text-right text-sm print:text-xs text-slate-500 space-y-1">
-              <p>Date: {new Date(record.createdAt).toLocaleDateString()}</p>
+              <p>Date: {new Date(record.createdAt).toLocaleDateString('en-GB')}</p>
               <p>Rules Version: {record.rulesVersion}</p>
               <p>Mode: {record.calculationMode}</p>
             </div>
@@ -68,12 +70,12 @@ const ValuationDetail = () => {
                   <p><span className="text-slate-500 block text-xs">Holding No</span> <span className="font-medium text-slate-900">{record.property.holdingNumber || 'N/A'}</span></p>
                   <p><span className="text-slate-500 block text-xs">Owner Name</span> <span className="font-medium text-slate-900">{record.property.ownerName || 'N/A'}</span></p>
                   <p><span className="text-slate-500 block text-xs">Location</span> <span className="text-slate-900">{record.property.location || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">Assessment Date</span> <span className="text-slate-900">{new Date(record.createdAt).toLocaleDateString('en-GB')}</span></p>
                 </div>
                 <div className="space-y-2 print:space-y-1">
                   <p><span className="text-slate-500 block text-xs">District</span> <span className="text-slate-900">{record.property.district || 'N/A'}</span></p>
                   <p><span className="text-slate-500 block text-xs">ULB Name</span> <span className="text-slate-900">{record.property.ulbName || 'N/A'}</span></p>
                   <p><span className="text-slate-500 block text-xs">Ward No</span> <span className="text-slate-900">{record.property.ward || 'N/A'}</span></p>
-                  <p><span className="text-slate-500 block text-xs">Assessment Date</span> <span className="text-slate-900">{record.property.assessmentDate ? new Date(record.property.assessmentDate).toLocaleDateString() : 'N/A'}</span></p>
                 </div>
               </div>
             </div>
@@ -81,18 +83,30 @@ const ValuationDetail = () => {
               <h3 className="font-semibold text-slate-700 mb-3 print:mb-2 flex items-center uppercase tracking-wider text-xs">
                 <MapIcon className="w-4 h-4 mr-2" /> Assessment Inputs
               </h3>
-              <div className="grid grid-cols-2 gap-4 print:gap-2">
-                <div className="space-y-2 print:space-y-1">
-                  <p><span className="text-slate-500 block text-xs">Covered Area</span> <span className="font-medium text-slate-900">{record.inputs.coverAreaSqFt} sq ft</span></p>
-                  <p><span className="text-slate-500 block text-xs">Building Age</span> <span className="font-medium text-slate-900">{record.inputs.buildingAgeYears} yrs</span></p>
-                  <p><span className="text-slate-500 block text-xs">Zone</span> <span className="font-medium text-slate-900">{record.inputs.zoneScoreCode}</span></p>
+              {record.valuationType === 'LAND' ? (
+                <div className="grid grid-cols-2 gap-4 print:gap-2">
+                  <div className="space-y-2 print:space-y-1">
+                    <p><span className="text-slate-500 block text-xs">Total Land Area</span> <span className="font-medium text-slate-900">{record.calculationBreakdown.totalLandSqFt.toLocaleString()} sq ft</span></p>
+                    <p><span className="text-slate-500 block text-xs">Zone</span> <span className="font-medium text-slate-900">{record.inputs.zone}</span></p>
+                  </div>
+                  <div className="space-y-2 print:space-y-1">
+                    <p><span className="text-slate-500 block text-xs">Land Type</span> <span className="font-medium text-slate-900">{record.inputs.landType}</span></p>
+                  </div>
                 </div>
-                <div className="space-y-2 print:space-y-1">
-                  <p><span className="text-slate-500 block text-xs">Usage</span> <span className="font-medium text-slate-900">{record.inputs.useOrCommercialScoreCode}</span></p>
-                  <p><span className="text-slate-500 block text-xs">Construction</span> <span className="font-medium text-slate-900">{record.inputs.constructionScoreCode}</span></p>
-                  <p><span className="text-slate-500 block text-xs">Total Land</span> <span className="font-medium text-slate-900">{record.calculationBreakdown.totalLandSqFt.toLocaleString()} sq ft</span></p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 print:gap-2">
+                  <div className="space-y-2 print:space-y-1">
+                    <p><span className="text-slate-500 block text-xs">Covered Area</span> <span className="font-medium text-slate-900">{record.inputs.coverAreaSqFt} sq ft</span></p>
+                    <p><span className="text-slate-500 block text-xs">Building Age</span> <span className="font-medium text-slate-900">{record.inputs.buildingAgeYears} yrs</span></p>
+                    <p><span className="text-slate-500 block text-xs">Zone</span> <span className="font-medium text-slate-900">{record.inputs.zoneScoreCode}</span></p>
+                  </div>
+                  <div className="space-y-2 print:space-y-1">
+                    <p><span className="text-slate-500 block text-xs">Usage</span> <span className="font-medium text-slate-900">{record.inputs.useOrCommercialScoreCode}</span></p>
+                    <p><span className="text-slate-500 block text-xs">Construction</span> <span className="font-medium text-slate-900">{record.inputs.constructionScoreCode}</span></p>
+                    <p><span className="text-slate-500 block text-xs">Total Land</span> <span className="font-medium text-slate-900">{record.calculationBreakdown.totalLandSqFt.toLocaleString()} sq ft</span></p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -104,37 +118,54 @@ const ValuationDetail = () => {
 
           <div className="space-y-6 print:space-y-4">
             {/* Score & Building */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:gap-4">
-              <div className="bg-white p-5 print:p-4 rounded-lg border border-slate-200">
-                <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 print:mb-2 border-b border-slate-100 pb-2">Score Breakdown</h4>
-                <div className="space-y-2 print:space-y-1 text-sm print:text-xs">
-                  <div className="flex justify-between"><span className="text-slate-600">Zone Score</span><span>{record.resolvedScores.zone}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-600">Usage Score</span><span>{record.resolvedScores.usage}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-600">Construction Score</span><span>{record.resolvedScores.construction}</span></div>
-                  {record.resolvedScores.additional > 0 && (
-                    <div className="flex justify-between"><span className="text-slate-600">Additional Score</span><span>{record.resolvedScores.additional}</span></div>
-                  )}
-                  <div className="flex justify-between font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">
-                    <span>Total Score</span><span>{record.resolvedScores.totalScore}</span>
+            {record.valuationType === 'LAND' ? (
+              <div className="grid grid-cols-1 gap-8 print:gap-4">
+                <div className="bg-white p-5 print:p-4 rounded-lg border border-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 print:mb-2 border-b border-slate-100 pb-2">Land Value Breakdown</h4>
+                  <div className="space-y-2 print:space-y-1 text-sm print:text-xs">
+                    <div className="flex justify-between"><span className="text-slate-600">Normal Land Valuation</span><span className="font-medium">{formatCurrency(record.calculationBreakdown.normalLandValuation || 0)}</span></div>
+                    {record.calculationBreakdown.pondAdjustment > 0 && (
+                      <div className="flex justify-between text-red-600">
+                        <span>Pond Adjustment (50%)</span>
+                        <span>- {formatCurrency(record.calculationBreakdown.pondAdjustment)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 print:gap-4">
+                <div className="bg-white p-5 print:p-4 rounded-lg border border-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 print:mb-2 border-b border-slate-100 pb-2">Score Breakdown</h4>
+                  <div className="space-y-2 print:space-y-1 text-sm print:text-xs">
+                    <div className="flex justify-between"><span className="text-slate-600">Zone Score</span><span>{record.resolvedScores?.zone || 0}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-600">Usage Score</span><span>{record.resolvedScores?.usage || 0}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-600">Construction Score</span><span>{record.resolvedScores?.construction || 0}</span></div>
+                    {record.resolvedScores?.additional > 0 && (
+                      <div className="flex justify-between"><span className="text-slate-600">Additional Score</span><span>{record.resolvedScores.additional}</span></div>
+                    )}
+                    <div className="flex justify-between font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">
+                      <span>Total Score</span><span>{record.resolvedScores?.totalScore || 0}</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="bg-white p-5 print:p-4 rounded-lg border border-slate-200">
-                <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 print:mb-2 border-b border-slate-100 pb-2">Building & Land</h4>
-                <div className="space-y-2 print:space-y-1 text-sm print:text-xs">
-                  <div className="flex justify-between"><span className="text-slate-600">Assessed Building Value</span><span className="font-medium">{formatCurrency(record.calculationBreakdown.assessedBuildingValue)}</span></div>
-                  <div className="flex justify-between text-red-600">
-                    <span>Depreciation ({record.calculationBreakdown.depreciationPercent}%)</span>
-                    <span>- {formatCurrency(record.calculationBreakdown.depreciationAmount)}</span>
-                  </div>
-                  <div className="flex justify-between text-emerald-600">
-                    <span>Land Addition</span>
-                    <span>+ {formatCurrency(record.calculationBreakdown.landAddition)}</span>
+                <div className="bg-white p-5 print:p-4 rounded-lg border border-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 print:mb-2 border-b border-slate-100 pb-2">Building & Land</h4>
+                  <div className="space-y-2 print:space-y-1 text-sm print:text-xs">
+                    <div className="flex justify-between"><span className="text-slate-600">Assessed Building Value</span><span className="font-medium">{formatCurrency(record.calculationBreakdown.assessedBuildingValue || 0)}</span></div>
+                    <div className="flex justify-between text-red-600">
+                      <span>Depreciation ({record.calculationBreakdown.depreciationPercent || 0}%)</span>
+                      <span>- {formatCurrency(record.calculationBreakdown.depreciationAmount || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-emerald-600">
+                      <span>Land Addition</span>
+                      <span>+ {formatCurrency(record.calculationBreakdown.landAddition || 0)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Final Results */}
             <div className="bg-slate-900 text-white p-6 print:p-4 rounded-xl shadow-inner mt-8 print:mt-4 print:bg-slate-100 print:text-slate-900 print:border print:border-slate-300">
@@ -154,7 +185,7 @@ const ValuationDetail = () => {
                     <span className="text-slate-400 text-sm mr-4">Quarter Tax / Fee:</span>
                     <span className="text-2xl font-bold text-emerald-400">{formatCurrency(record.calculationBreakdown.quarterTax)}</span>
                   </div>
-                  {record.calculationBreakdown.commercialSurcharge !== null && (
+                  {record.calculationBreakdown.commercialSurcharge != null && (
                     <div>
                       <span className="text-slate-400 text-sm mr-4">Commercial Surcharge (20%):</span>
                       <span className="text-xl font-bold text-amber-400">{formatCurrency(record.calculationBreakdown.commercialSurcharge)}</span>

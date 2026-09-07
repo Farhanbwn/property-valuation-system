@@ -16,13 +16,24 @@ export const valuationService = {
   getRules: () => api.get('/valuations/rules'),
   calculatePropertyValuation: (data: any) => api.post('/valuations/calculate', data),
   savePropertyValuation: (data: any) => api.post('/valuations', data),
-  getHistory: (page = 1, limit = 10) => api.get(`/valuations?page=${page}&limit=${limit}`),
+  getHistory: (page = 1, limit = 10, type?: 'PROPERTY' | 'LAND') => {
+    let url = `/valuations?page=${page}&limit=${limit}`;
+    if (type) url += `&type=${type}`;
+    return api.get(url);
+  },
   getValuationById: (id: string) => api.get(`/valuations/${id}`),
   deleteValuation: (id: string) => api.delete(`/valuations/${id}`),
   calculateStandaloneLandValuation: (data: any) => api.post('/valuations/land-calculate', data),
+  saveStandaloneLandValuation: (data: any) => api.post('/valuations/land', data),
+  getDashboardStats: () => api.get('/valuations/stats'),
 };
 
 export const authService = {
   login: (data: any) => api.post('/auth/login', data),
   register: (data: any) => api.post('/auth/register', data),
+};
+
+export const userService = {
+  getUsers: () => api.get('/users'),
+  changePassword: (data: any) => api.put('/users/password', data),
 };

@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import valuationRoutes from './routes/valuation.routes';
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/user.routes';
 import { User } from './models/User';
 import bcrypt from 'bcryptjs';
 
@@ -29,6 +30,7 @@ app.use('/api', limiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/valuations', valuationRoutes);
 
 // Health check
@@ -41,22 +43,7 @@ mongoose.connect(MONGODB_URI)
   .then(async () => {
     console.log('Connected to MongoDB');
     
-    // Seed admin user
-    try {
-      const adminExists = await User.findOne({ email: 'Admin@bwnpvc.com' });
-      if (!adminExists) {
-        const passwordHash = await bcrypt.hash('Admin@NC_9232', 10);
-        await User.create({
-          name: 'Admin',
-          email: 'Admin@bwnpvc.com',
-          passwordHash,
-          role: 'admin'
-        });
-        console.log('Admin user seeded');
-      }
-    } catch (e) {
-      console.error('Failed to seed admin user', e);
-    }
+    // Admin user seeding removed as per user request
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

@@ -6,6 +6,8 @@ import LandValuation from './pages/LandValuation';
 import ValuationHistory from './pages/ValuationHistory';
 import ValuationDetail from './pages/ValuationDetail';
 import ValuationRules from './pages/ValuationRules';
+import UserManagement from './pages/UserManagement';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 import { useAuth } from './context/AuthContext';
 
@@ -44,6 +46,8 @@ function App() {
           <Route path="valuation-history" element={<ValuationHistory />} />
           <Route path="valuation/:id" element={<ValuationDetail />} />
           <Route path="settings/valuation-rules" element={<ValuationRules />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
       </Routes>
     </Router>

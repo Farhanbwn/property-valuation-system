@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { ValuationRule } from '../models/ValuationRule';
 import { ValuationRecord } from '../models/ValuationRecord';
+import { User } from '../models/User';
 import { ValuationService } from '../services/valuation.service';
 import { propertyValuationInputSchema, standaloneLandValuationInputSchema } from '../validators/valuation.validator';
 import { z } from 'zod';
@@ -116,7 +117,15 @@ export const getValuationHistory = async (req: AuthRequest, res: Response) => {
       query.userId = req.user?.id;
     }
 
+    const type = req.query.type as string;
+    if (type === 'LAND') {
+      query.valuationType = 'LAND';
+    } else if (type === 'PROPERTY') {
+      query.valuationType = { $ne: 'LAND' };
+    }
+
     const records = await ValuationRecord.find(query)
+      .populate('userId', 'name email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -131,6 +140,34 @@ export const getValuationHistory = async (req: AuthRequest, res: Response) => {
         page,
         limit,
         totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const getDashboardStats = async (req: AuthRequest, res: Response) => {
+  try {
+    const query: any = {};
+    if (req.user?.role !== 'admin') {
+      query.userId = req.user?.id;
+    }
+
+    const totalProperty = await ValuationRecord.countDocuments({ ...query, valuationType: { $ne: 'LAND' } });
+    const totalLand = await ValuationRecord.countDocuments({ ...query, valuationType: 'LAND' });
+    
+    let totalUsers = 0;
+    if (req.user?.role === 'admin') {
+      totalUsers = await User.countDocuments();
+    }
+
+    res.json({
+      success: true,
+      data: {
+        totalProperty,
+        totalLand,
+        ...(req.user?.role === 'admin' && { totalUsers })
       }
     });
   } catch (error) {
@@ -189,6 +226,57 @@ export const calculateStandaloneLandValuation = async (req: Request, res: Respon
     }, rules);
     
     res.json({ success: true, data: result });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid valuation input.', 
+        errors: error.issues.map((e: any) => ({ field: e.path.join('.'), message: e.message })) 
+      });
+    }
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const saveStandaloneLandValuation = async (req: AuthRequest, res: Response) => {
+  try {
+    const validatedData = standaloneLandValuationInputSchema.parse(req.body);
+    const rules = await ValuationRule.findOne({ active: true });
+    
+    if (!rules) {
+      return res.status(404).json({ success: false, message: 'No active valuation rules found.' });
+    }
+
+    const result = ValuationService.calculateStandaloneLandValuation({
+      zone: validatedData.zone,
+      landArea: validatedData.landArea,
+      landType: validatedData.landType
+    }, rules);
+    
+    const record = new ValuationRecord({
+      userId: req.user?.id,
+      valuationType: 'LAND',
+      property: validatedData.propertyDetails,
+      inputs: {
+        zone: validatedData.zone,
+        landArea: validatedData.landArea,
+        landType: validatedData.landType
+      },
+      calculationBreakdown: {
+        totalLandSqFt: result.totalLandSqFt,
+        normalLandValuation: result.normalLandValuation,
+        pondAdjustment: result.pondAdjustment,
+        minimumApplied: result.minimumApplied,
+        effectiveValuation: result.effectiveLandValuation,
+        quarterTax: result.quarterTax
+      },
+      rulesVersion: rules.schemaVersion,
+      calculationMode: 'excel-strict'
+    });
+
+    await record.save();
+
+    res.status(201).json({ success: true, data: { id: record._id, ...result } });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 

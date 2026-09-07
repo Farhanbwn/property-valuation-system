@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IValuationRecord extends Document {
   userId: mongoose.Types.ObjectId;
+  valuationType: 'PROPERTY' | 'LAND';
   property: {
     holdingNumber?: string;
     ownerName?: string;
@@ -14,12 +15,14 @@ export interface IValuationRecord extends Document {
     notes?: string;
   };
   inputs: {
-    coverAreaSqFt: number;
-    zoneScoreCode: string;
-    useOrCommercialScoreCode: string;
-    constructionScoreCode: string;
+    coverAreaSqFt?: number;
+    zoneScoreCode?: string;
+    useOrCommercialScoreCode?: string;
+    constructionScoreCode?: string;
     optionalFourthScoreCode?: string;
-    buildingAgeYears: number;
+    buildingAgeYears?: number;
+    zone?: string;
+    landType?: 'NORMAL' | 'POND';
     landArea: {
       bigha: number;
       khatha: number;
@@ -28,19 +31,21 @@ export interface IValuationRecord extends Document {
     };
   };
   resolvedScores: {
-    zone: number;
-    usage: number;
-    construction: number;
-    additional: number;
-    totalScore: number;
+    zone?: number;
+    usage?: number;
+    construction?: number;
+    additional?: number;
+    totalScore?: number;
   };
   calculationBreakdown: {
-    assessedBuildingValue: number;
-    depreciationPercent: number;
-    depreciationAmount: number;
+    assessedBuildingValue?: number;
+    depreciationPercent?: number;
+    depreciationAmount?: number;
     totalLandSqFt: number;
-    landAddition: number;
-    calculatedValuation: number;
+    landAddition?: number;
+    normalLandValuation?: number;
+    pondAdjustment?: number;
+    calculatedValuation?: number;
     minimumApplied: boolean;
     effectiveValuation: number;
     quarterTax: number;
@@ -53,6 +58,7 @@ export interface IValuationRecord extends Document {
 const ValuationRecordSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    valuationType: { type: String, enum: ['PROPERTY', 'LAND'], default: 'PROPERTY' },
     property: {
       holdingNumber: { type: String },
       ownerName: { type: String },
@@ -65,12 +71,14 @@ const ValuationRecordSchema = new Schema(
       notes: { type: String },
     },
     inputs: {
-      coverAreaSqFt: { type: Number, required: true },
-      zoneScoreCode: { type: String, required: true },
-      useOrCommercialScoreCode: { type: String, required: true },
-      constructionScoreCode: { type: String, required: true },
+      coverAreaSqFt: { type: Number },
+      zoneScoreCode: { type: String },
+      useOrCommercialScoreCode: { type: String },
+      constructionScoreCode: { type: String },
       optionalFourthScoreCode: { type: String },
-      buildingAgeYears: { type: Number, required: true },
+      buildingAgeYears: { type: Number },
+      zone: { type: String },
+      landType: { type: String, enum: ['NORMAL', 'POND'] },
       landArea: {
         bigha: { type: Number, required: true },
         khatha: { type: Number, required: true },
@@ -79,19 +87,21 @@ const ValuationRecordSchema = new Schema(
       },
     },
     resolvedScores: {
-      zone: { type: Number, required: true },
-      usage: { type: Number, required: true },
-      construction: { type: Number, required: true },
+      zone: { type: Number },
+      usage: { type: Number },
+      construction: { type: Number },
       additional: { type: Number, default: 0 },
-      totalScore: { type: Number, required: true },
+      totalScore: { type: Number },
     },
     calculationBreakdown: {
-      assessedBuildingValue: { type: Number, required: true },
-      depreciationPercent: { type: Number, required: true },
-      depreciationAmount: { type: Number, required: true },
+      assessedBuildingValue: { type: Number },
+      depreciationPercent: { type: Number },
+      depreciationAmount: { type: Number },
       totalLandSqFt: { type: Number, required: true },
-      landAddition: { type: Number, required: true },
-      calculatedValuation: { type: Number, required: true },
+      landAddition: { type: Number },
+      normalLandValuation: { type: Number },
+      pondAdjustment: { type: Number },
+      calculatedValuation: { type: Number },
       minimumApplied: { type: Boolean, required: true },
       effectiveValuation: { type: Number, required: true },
       quarterTax: { type: Number, required: true },

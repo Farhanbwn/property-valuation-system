@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calculator, Map, History, Settings, Menu, X, LogOut } from 'lucide-react';
+import { Home, Calculator, Map, History, Settings, Menu, X, LogOut, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
+import logo from '../assets/logo.png';
 
 const Layout = () => {
   const location = useLocation();
@@ -21,7 +22,12 @@ const Layout = () => {
     { name: 'Land Valuation', href: '/land-valuation', icon: Map },
     { name: 'History', href: '/valuation-history', icon: History },
     { name: 'Rules Config', href: '/settings/valuation-rules', icon: Settings },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
+
+  if (user?.role === 'admin') {
+    navigation.push({ name: 'User Management', href: '/users', icon: Users });
+  }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
@@ -45,12 +51,12 @@ const Layout = () => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-secondary text-white no-print z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6 hidden md:block">
-          <h1 className="text-xl font-bold tracking-tight text-white">Burdwan Property & land valuation Calculator</h1>
-          <p className="text-slate-400 text-sm mt-1">Property Calculator</p>
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-secondary text-white no-print z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col h-screen ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-6 hidden md:flex md:flex-col md:items-center md:justify-center flex-shrink-0">
+          <img src={logo} alt="BWNPLVC Logo" className="w-24 h-auto mb-2 object-contain" />
+          <h1 className="text-xl font-bold tracking-tight text-white">BWNPLVC</h1>
         </div>
-        <nav className="mt-6">
+        <nav className="mt-2 flex-1 overflow-y-auto">
           {navigation.map((item) => {
             const isActive = location.pathname.startsWith(item.href);
             return (
@@ -72,7 +78,7 @@ const Layout = () => {
         </nav>
 
         {/* User & Logout section at the bottom */}
-        <div className="absolute bottom-0 w-full p-4 border-t border-slate-700">
+        <div className="mt-auto w-full p-4 border-t border-slate-700 flex-shrink-0 bg-secondary">
           {user && (
             <div className="mb-4 px-2">
               <p className="text-sm font-semibold truncate" title={user.name}>

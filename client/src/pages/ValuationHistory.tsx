@@ -2,16 +2,19 @@ import { useEffect, useState } from 'react';
 import { valuationService } from '../services/api';
 import { Link } from 'react-router-dom';
 import { Eye, Trash2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const ValuationHistory = () => {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'PROPERTY' | 'LAND'>('PROPERTY');
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
 
-  const fetchRecords = async (page: number) => {
+  const fetchRecords = async (page: number, type: 'PROPERTY' | 'LAND' = activeTab) => {
     try {
       setLoading(true);
-      const res = await valuationService.getHistory(page, 10);
+      const res = await valuationService.getHistory(page, 10, type);
       setRecords(res.data.data);
       setPagination({ page: res.data.pagination.page, totalPages: res.data.pagination.totalPages });
     } catch (err) {
@@ -22,8 +25,8 @@ const ValuationHistory = () => {
   };
 
   useEffect(() => {
-    fetchRecords(1);
-  }, []);
+    fetchRecords(1, activeTab);
+  }, [activeTab]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this valuation?')) {
@@ -41,11 +44,33 @@ const ValuationHistory = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-2">
         <h1 className="text-2xl font-bold text-slate-900">Valuation History</h1>
-        <Link to="/property-valuation" className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-          New Valuation
-        </Link>
+      </div>
+
+      <div className="flex justify-center mb-2">
+        <div className="bg-slate-100 p-1 rounded-xl inline-flex space-x-1 border border-slate-200">
+          <button
+            onClick={() => setActiveTab('PROPERTY')}
+            className={`px-8 py-2.5 text-sm font-medium rounded-lg transition-all ${
+              activeTab === 'PROPERTY' 
+                ? 'bg-primary text-white shadow-sm' 
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            Property Valuations
+          </button>
+          <button
+            onClick={() => setActiveTab('LAND')}
+            className={`px-8 py-2.5 text-sm font-medium rounded-lg transition-all ${
+              activeTab === 'LAND' 
+                ? 'bg-primary text-white shadow-sm' 
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            Land Valuations
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -54,9 +79,19 @@ const ValuationHistory = () => {
             <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 font-semibold">Date</th>
+                {user?.role === 'admin' && <th className="px-6 py-4 font-semibold">Assessed By</th>}
                 <th className="px-6 py-4 font-semibold">Holding No.</th>
                 <th className="px-6 py-4 font-semibold">Owner</th>
-                <th className="px-6 py-4 font-semibold">Zone</th>
+                {user?.role !== 'admin' && (
+                  <>
+                    <th className="px-6 py-4 font-semibold">Zone</th>
+                    {activeTab === 'PROPERTY' ? (
+                      <th className="px-6 py-4 font-semibold">Usage</th>
+                    ) : (
+                      <th className="px-6 py-4 font-semibold">Land Type</th>
+                    )}
+                  </>
+                )}
                 <th className="px-6 py-4 font-semibold text-right">Valuation</th>
                 <th className="px-6 py-4 font-semibold text-right">Q. Tax</th>
                 <th className="px-6 py-4 font-semibold text-center">Actions</th>
@@ -65,19 +100,34 @@ const ValuationHistory = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500">Loading...</td>
+                  <td colSpan={user?.role === 'admin' ? 7 : 8} className="px-6 py-10 text-center text-slate-500">Loading...</td>
                 </tr>
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500">No valuations found.</td>
+                  <td colSpan={user?.role === 'admin' ? 7 : 8} className="px-6 py-10 text-center text-slate-500">No valuations found.</td>
                 </tr>
               ) : (
                 records.map((record) => (
                   <tr key={record._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 text-slate-600">{new Date(record.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 font-medium text-slate-900">{record.property.holdingNumber || '-'}</td>
-                    <td className="px-6 py-4 text-slate-600">{record.property.ownerName || '-'}</td>
-                    <td className="px-6 py-4 text-slate-600">{record.inputs.zoneScoreCode}</td>
+                    <td className="px-6 py-4 text-slate-600">{new Date(record.createdAt).toLocaleDateString('en-GB')}</td>
+                    {user?.role === 'admin' && <td className="px-6 py-4 text-slate-600">{record.userId?.name || '-'}</td>}
+                    <td className="px-6 py-4 font-medium text-slate-900">{record.property?.holdingNumber || '-'}</td>
+                    <td className="px-6 py-4 text-slate-600">{record.property?.ownerName || '-'}</td>
+                    
+                    {user?.role !== 'admin' && (
+                      activeTab === 'PROPERTY' ? (
+                        <>
+                          <td className="px-6 py-4 text-slate-600">{record.inputs.zoneScoreCode || '-'}</td>
+                          <td className="px-6 py-4 text-slate-600">{record.inputs.useOrCommercialScoreCode || '-'}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-6 py-4 text-slate-600">{record.inputs.zone || '-'}</td>
+                          <td className="px-6 py-4 text-slate-600">{record.inputs.landType || '-'}</td>
+                        </>
+                      )
+                    )}
+
                     <td className="px-6 py-4 text-right font-medium text-slate-900">{formatCurrency(record.calculationBreakdown.effectiveValuation)}</td>
                     <td className="px-6 py-4 text-right text-slate-600">{formatCurrency(record.calculationBreakdown.quarterTax)}</td>
                     <td className="px-6 py-4">

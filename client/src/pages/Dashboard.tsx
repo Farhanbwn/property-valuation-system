@@ -1,35 +1,30 @@
 import { useEffect, useState } from 'react';
 import { valuationService } from '../services/api';
-import { Calculator, Map, Activity, Clock } from 'lucide-react';
+import { Calculator, Map, Clock, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState({
-    total: 0,
-    average: 0,
-    highest: 0,
+    totalProperty: 0,
+    totalLand: 0,
+    totalUsers: 0,
   });
   const [recent, setRecent] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        const statsRes = await valuationService.getDashboardStats();
+        if (statsRes.data.success) {
+          setStats(statsRes.data.data);
+        }
+
         const res = await valuationService.getHistory(1, 5);
         if (res.data.success) {
           const records = res.data.data;
           setRecent(records);
-          
-          if (records.length > 0) {
-            const total = res.data.pagination.total;
-            const avg = records.reduce((acc: number, r: any) => acc + r.calculationBreakdown.effectiveValuation, 0) / records.length;
-            const max = Math.max(...records.map((r: any) => r.calculationBreakdown.effectiveValuation));
-            
-            setStats({
-              total,
-              average: avg,
-              highest: max
-            });
-          }
         }
       } catch (err) {
         console.error(err);
@@ -46,29 +41,31 @@ const Dashboard = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center text-slate-500 mb-4">
-            <Activity className="w-5 h-5 mr-2 text-primary-light" />
-            <h3 className="text-sm font-medium">Total Valuations</h3>
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${user?.role === 'admin' ? 'lg:grid-cols-3' : ''} gap-6`}>
+        {user?.role === 'admin' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center text-slate-500 mb-4">
+              <Users className="w-5 h-5 mr-2 text-primary-light" />
+              <h3 className="text-sm font-medium">Total Users</h3>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{stats.totalUsers}</p>
           </div>
-          <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
-        </div>
+        )}
         
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center text-slate-500 mb-4">
             <Calculator className="w-5 h-5 mr-2 text-accent" />
-            <h3 className="text-sm font-medium">Average Valuation</h3>
+            <h3 className="text-sm font-medium">Total Property Valuation</h3>
           </div>
-          <p className="text-3xl font-bold text-slate-900">{formatCurrency(stats.average)}</p>
+          <p className="text-3xl font-bold text-slate-900">{stats.totalProperty}</p>
         </div>
         
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center text-slate-500 mb-4">
             <Map className="w-5 h-5 mr-2 text-emerald-500" />
-            <h3 className="text-sm font-medium">Highest Valuation</h3>
+            <h3 className="text-sm font-medium">Total Land Valuation</h3>
           </div>
-          <p className="text-3xl font-bold text-slate-900">{formatCurrency(stats.highest)}</p>
+          <p className="text-3xl font-bold text-slate-900">{stats.totalLand}</p>
         </div>
       </div>
 

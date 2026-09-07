@@ -3,9 +3,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
-import { Map, Calculator } from 'lucide-react';
+import { Map, Calculator, Save } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const formSchema = z.object({
+  propertyDetails: z.object({
+    ownerName: z.string().optional(),
+    district: z.string().optional(),
+    ulbName: z.string().optional(),
+    ward: z.coerce.number().optional(),
+    location: z.string().optional(),
+    holdingNumber: z.string().optional()
+  }),
   zone: z.string().min(1, 'Zone is required'),
   landType: z.enum(['NORMAL', 'POND']),
   landArea: z.object({
@@ -19,19 +28,31 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const LandValuation = () => {
+  const navigate = useNavigate();
   const [rules, setRules] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [liveResult, setLiveResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { register, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
+      propertyDetails: {
+        district: 'Purba Bardhaman',
+        ulbName: 'Burdwan Municipality'
+      },
       landType: 'NORMAL',
       landArea: { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
     }
   });
 
   const watchAllFields = watch();
+  const selectedWard = watch('propertyDetails.ward');
+
+  useEffect(() => {
+    setValue('propertyDetails.location', '');
+  }, [selectedWard, setValue]);
 
   useEffect(() => {
     valuationService.getRules()
@@ -59,6 +80,18 @@ const LandValuation = () => {
     }
   };
 
+  const onSubmit = async (data: FormData) => {
+    try {
+      setSaving(true);
+      const res = await valuationService.saveStandaloneLandValuation(data);
+      navigate(`/valuation/${res.data.data.id}`);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to save valuation');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
 
@@ -69,12 +102,62 @@ const LandValuation = () => {
     <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
       {/* LEFT: FORM */}
       <div className="flex-1 space-y-6">
-        <h1 className="text-2xl font-bold text-slate-900">Standalone Land Valuation</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Land Valuation Calculator</h1>
         <p className="text-slate-500">Calculate valuation for empty land or ponds.</p>
         
-        <form className="space-y-6">
+        {error && <div className="p-4 text-red-700 bg-red-100 rounded-lg">{error}</div>}
+
+        <form id="land-valuation-form" onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+          
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Land Details</h2>
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Property Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
+                <input type="text" {...register('propertyDetails.ownerName')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">District</label>
+                <input type="text" {...register('propertyDetails.district')} disabled className="w-full rounded-md border-slate-300 shadow-sm bg-slate-100 text-slate-500 p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">ULB Name</label>
+                <input type="text" {...register('propertyDetails.ulbName')} disabled className="w-full rounded-md border-slate-300 shadow-sm bg-slate-100 text-slate-500 p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Ward</label>
+                <select {...register('propertyDetails.ward')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border bg-white">
+                  <option value="">Select Ward...</option>
+                  {rules?.locationData?.wards.map((w: any) => (
+                    <option key={w.ward} value={w.ward}>Ward {w.ward}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                <select {...register('propertyDetails.location')} disabled={!selectedWard} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border bg-white disabled:bg-slate-100">
+                  <option value="">Select Location...</option>
+                  {selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Holding Number</label>
+                <input type="text" {...register('propertyDetails.holdingNumber')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">2. Land Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div>
@@ -91,7 +174,7 @@ const LandValuation = () => {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Land Type *</label>
                 <select {...register('landType')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-primary focus:ring-primary">
-                  <option value="NORMAL">Normal</option>
+                  <option value="NORMAL">Vacant Land</option>
                   <option value="POND">Pond (50% Valuation)</option>
                 </select>
               </div>
@@ -100,7 +183,7 @@ const LandValuation = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-4 text-slate-800">2. Land Area</h2>
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">3. Land Area</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Bigha</label>
@@ -187,6 +270,18 @@ const LandValuation = () => {
                       <span className="font-bold text-emerald-600">{formatCurrency(liveResult.quarterTax)}</span>
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-6">
+                  <button 
+                    form="land-valuation-form"
+                    type="submit" 
+                    disabled={saving}
+                    className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                  >
+                    <Save className="w-5 h-5 mr-2" />
+                    {saving ? 'Saving...' : 'Save Valuation'}
+                  </button>
                 </div>
               </div>
             )}
