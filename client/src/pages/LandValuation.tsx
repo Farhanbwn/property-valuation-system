@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
 import { Map, Calculator, Save } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const formSchema = z.object({
   propertyDetails: z.object({
@@ -29,13 +29,14 @@ type FormData = z.infer<typeof formSchema>;
 
 const LandValuation = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [rules, setRules] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [liveResult, setLiveResult] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       propertyDetails: {
@@ -58,12 +59,28 @@ const LandValuation = () => {
     valuationService.getRules()
       .then(res => {
         setRules(res.data.data);
-        setLoading(false);
+        if (id) {
+          valuationService.getValuationById(id).then(recordRes => {
+            const d = recordRes.data.data;
+            reset({
+              propertyDetails: d.property || {},
+              zone: d.inputs.zone,
+              landType: d.inputs.landType,
+              landArea: d.inputs.landArea || { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
+            });
+            setLoading(false);
+          }).catch(() => {
+            setError('Failed to load existing valuation.');
+            setLoading(false);
+          });
+        } else {
+          setLoading(false);
+        }
       })
       .catch(() => {
         setLoading(false);
       });
-  }, []);
+  }, [id, reset]);
 
   useEffect(() => {
     if (watchAllFields.zone) {
@@ -83,7 +100,12 @@ const LandValuation = () => {
   const onSubmit = async (data: FormData) => {
     try {
       setSaving(true);
-      const res = await valuationService.saveStandaloneLandValuation(data);
+      let res;
+      if (id) {
+        res = await valuationService.updateStandaloneLandValuation(id, data);
+      } else {
+        res = await valuationService.saveStandaloneLandValuation(data);
+      }
       navigate(`/valuation/${res.data.data.id}`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to save valuation');
@@ -102,7 +124,7 @@ const LandValuation = () => {
     <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
       {/* LEFT: FORM */}
       <div className="flex-1 space-y-6">
-        <h1 className="text-2xl font-bold text-slate-900">Land Valuation Calculator</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{id ? 'Edit Land Valuation' : 'Land Valuation Calculator'}</h1>
         <p className="text-slate-500">Calculate valuation for empty land or ponds.</p>
         
         {error && <div className="p-4 text-red-700 bg-red-100 rounded-lg">{error}</div>}
@@ -280,7 +302,7 @@ const LandValuation = () => {
                     className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
                   >
                     <Save className="w-5 h-5 mr-2" />
-                    {saving ? 'Saving...' : 'Save Valuation'}
+                    {saving ? 'Saving...' : id ? 'Update Valuation' : 'Save Valuation'}
                   </button>
                 </div>
               </div>

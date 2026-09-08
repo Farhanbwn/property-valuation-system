@@ -16,15 +16,17 @@ export const valuationService = {
   getRules: () => api.get('/valuations/rules'),
   calculatePropertyValuation: (data: any) => api.post('/valuations/calculate', data),
   savePropertyValuation: (data: any) => api.post('/valuations', data),
-  getHistory: (page = 1, limit = 10, type?: 'PROPERTY' | 'LAND') => {
+  getHistory: (page = 1, limit = 10, type?: 'ALL' | 'PROPERTY' | 'LAND') => {
     let url = `/valuations?page=${page}&limit=${limit}`;
-    if (type) url += `&type=${type}`;
+    if (type && type !== 'ALL') url += `&type=${type}`;
     return api.get(url);
   },
   getValuationById: (id: string) => api.get(`/valuations/${id}`),
+  updatePropertyValuation: (id: string, data: any) => api.put(`/valuations/${id}`, data),
   deleteValuation: (id: string) => api.delete(`/valuations/${id}`),
   calculateStandaloneLandValuation: (data: any) => api.post('/valuations/land-calculate', data),
   saveStandaloneLandValuation: (data: any) => api.post('/valuations/land', data),
+  updateStandaloneLandValuation: (id: string, data: any) => api.put(`/valuations/land/${id}`, data),
   getDashboardStats: () => api.get('/valuations/stats'),
 };
 

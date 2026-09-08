@@ -41,8 +41,8 @@ function App() {
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="property-valuation" element={<PropertyValuation />} />
-          <Route path="land-valuation" element={<LandValuation />} />
+          <Route path="property-valuation/:id?" element={<PropertyValuation />} />
+          <Route path="land-valuation/:id?" element={<LandValuation />} />
           <Route path="valuation-history" element={<ValuationHistory />} />
           <Route path="valuation/:id" element={<ValuationDetail />} />
           <Route path="settings/valuation-rules" element={<ValuationRules />} />

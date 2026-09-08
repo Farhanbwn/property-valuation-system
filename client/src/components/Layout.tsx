@@ -22,7 +22,7 @@ const Layout = () => {
     { name: 'Land Valuation', href: '/land-valuation', icon: Map },
     { name: 'History', href: '/valuation-history', icon: History },
     { name: 'Rules Config', href: '/settings/valuation-rules', icon: Settings },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Settings', href: '/settings', icon: Settings, exact: true },
   ];
 
   if (user?.role === 'admin') {
@@ -58,7 +58,9 @@ const Layout = () => {
         </div>
         <nav className="mt-2 flex-1 overflow-y-auto">
           {navigation.map((item) => {
-            const isActive = location.pathname.startsWith(item.href);
+            const isActive = item.exact 
+              ? location.pathname === item.href 
+              : location.pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}

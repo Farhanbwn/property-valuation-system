@@ -106,6 +106,76 @@ export const savePropertyValuation = async (req: AuthRequest, res: Response) => 
   }
 };
 
+export const updatePropertyValuation = async (req: AuthRequest, res: Response) => {
+  try {
+    if (req.user?.role === 'admin') {
+      return res.status(403).json({ success: false, message: 'Admins cannot edit valuations.' });
+    }
+    const validatedData = propertyValuationInputSchema.parse(req.body);
+    const rules = await ValuationRule.findOne({ active: true });
+    
+    if (!rules) {
+      return res.status(404).json({ success: false, message: 'No active valuation rules found.' });
+    }
+
+    const record = await ValuationRecord.findById(req.params.id);
+    if (!record) {
+      return res.status(404).json({ success: false, message: 'Valuation not found.' });
+    }
+
+    if (record.userId.toString() !== req.user?.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
+    const result = ValuationService.calculateFullPropertyValuation(validatedData, rules, 'excel-strict');
+    
+    record.property = validatedData.propertyDetails as any;
+    record.inputs = {
+      coverAreaSqFt: validatedData.coverAreaSqFt,
+      zoneScoreCode: validatedData.zoneScoreCode,
+      useOrCommercialScoreCode: validatedData.useOrCommercialScoreCode,
+      constructionScoreCode: validatedData.constructionScoreCode,
+      optionalFourthScoreCode: validatedData.optionalFourthScoreCode,
+      buildingAgeYears: validatedData.buildingAgeYears,
+      landArea: validatedData.landArea
+    };
+    record.resolvedScores = {
+      zone: result.scores.zone,
+      usage: result.scores.usage,
+      construction: result.scores.construction,
+      additional: result.scores.additional,
+      totalScore: result.scores.total
+    };
+    record.calculationBreakdown = {
+      assessedBuildingValue: result.building.assessedValue,
+      depreciationPercent: result.building.depreciationPercent,
+      depreciationAmount: result.building.depreciationAmount,
+      totalLandSqFt: result.land.totalSqFt,
+      landAddition: result.land.landAddition,
+      calculatedValuation: result.valuation.calculated,
+      minimumApplied: result.valuation.minimumApplied,
+      effectiveValuation: result.valuation.effective,
+      quarterTax: result.charges.quarterTax,
+      commercialSurcharge: result.charges.commercialSurcharge
+    };
+    record.rulesVersion = result.rulesVersion;
+    record.calculationMode = 'excel-strict';
+
+    await record.save();
+
+    res.json({ success: true, data: { id: record._id, ...result } });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid valuation input.', 
+        errors: error.issues.map((e: any) => ({ field: e.path.join('.'), message: e.message })) 
+      });
+    }
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 export const getValuationHistory = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -277,6 +347,66 @@ export const saveStandaloneLandValuation = async (req: AuthRequest, res: Respons
     await record.save();
 
     res.status(201).json({ success: true, data: { id: record._id, ...result } });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid valuation input.', 
+        errors: error.issues.map((e: any) => ({ field: e.path.join('.'), message: e.message })) 
+      });
+    }
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const updateStandaloneLandValuation = async (req: AuthRequest, res: Response) => {
+  try {
+    if (req.user?.role === 'admin') {
+      return res.status(403).json({ success: false, message: 'Admins cannot edit valuations.' });
+    }
+    const validatedData = standaloneLandValuationInputSchema.parse(req.body);
+    const rules = await ValuationRule.findOne({ active: true });
+    
+    if (!rules) {
+      return res.status(404).json({ success: false, message: 'No active valuation rules found.' });
+    }
+
+    const record = await ValuationRecord.findById(req.params.id);
+    if (!record) {
+      return res.status(404).json({ success: false, message: 'Valuation not found.' });
+    }
+
+    if (record.userId.toString() !== req.user?.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
+    const result = ValuationService.calculateStandaloneLandValuation({
+      zone: validatedData.zone,
+      landArea: validatedData.landArea,
+      landType: validatedData.landType
+    }, rules);
+    
+    record.property = validatedData.propertyDetails as any;
+    record.inputs = {
+      zone: validatedData.zone,
+      landArea: validatedData.landArea,
+      landType: validatedData.landType
+    };
+    record.calculationBreakdown = {
+      totalLandSqFt: result.totalLandSqFt,
+      normalLandValuation: result.normalLandValuation,
+      pondAdjustment: result.pondAdjustment,
+      minimumApplied: result.minimumApplied,
+      effectiveValuation: result.effectiveLandValuation,
+      quarterTax: result.quarterTax,
+      commercialSurcharge: null
+    };
+    record.rulesVersion = rules.schemaVersion;
+    record.calculationMode = 'excel-strict';
+
+    await record.save();
+
+    res.json({ success: true, data: { id: record._id, ...result } });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 

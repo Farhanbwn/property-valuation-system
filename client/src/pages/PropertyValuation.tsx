@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
 import { Calculator, Save, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const formSchema = z.object({
   propertyDetails: z.object({
@@ -36,6 +36,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const PropertyValuation = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [rules, setRules] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +44,7 @@ const PropertyValuation = () => {
   const [calculating, setCalculating] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useRHForm<FormData>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useRHForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       propertyDetails: {
@@ -62,13 +63,33 @@ const PropertyValuation = () => {
     valuationService.getRules()
       .then(res => {
         setRules(res.data.data);
-        setLoading(false);
+        if (id) {
+          valuationService.getValuationById(id).then(recordRes => {
+            const d = recordRes.data.data;
+            reset({
+              propertyDetails: d.property || {},
+              coverAreaSqFt: d.inputs.coverAreaSqFt,
+              zoneScoreCode: d.inputs.zoneScoreCode,
+              useOrCommercialScoreCode: d.inputs.useOrCommercialScoreCode,
+              constructionScoreCode: d.inputs.constructionScoreCode,
+              optionalFourthScoreCode: d.inputs.optionalFourthScoreCode || '',
+              buildingAgeYears: d.inputs.buildingAgeYears,
+              landArea: d.inputs.landArea || { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
+            });
+            setLoading(false);
+          }).catch(() => {
+            setError('Failed to load existing valuation.');
+            setLoading(false);
+          });
+        } else {
+          setLoading(false);
+        }
       })
       .catch(() => {
         setError('Failed to load valuation rules. Ensure database is seeded and running.');
         setLoading(false);
       });
-  }, []);
+  }, [id, reset]);
 
   const selectedWard = watch('propertyDetails.ward');
   useEffect(() => {
@@ -102,7 +123,12 @@ const PropertyValuation = () => {
   const onSubmit = async (data: FormData) => {
     try {
       setSaving(true);
-      const res = await valuationService.savePropertyValuation(data);
+      let res;
+      if (id) {
+        res = await valuationService.updatePropertyValuation(id, data);
+      } else {
+        res = await valuationService.savePropertyValuation(data);
+      }
       navigate(`/valuation/${res.data.data.id}`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to save valuation');
@@ -121,7 +147,7 @@ const PropertyValuation = () => {
     <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
       {/* LEFT: FORM */}
       <div className="flex-1 space-y-6">
-        <h1 className="text-2xl font-bold text-slate-900">Property Valuation Calculator</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{id ? 'Edit Property Valuation' : 'Property Valuation Calculator'}</h1>
         
         <form id="valuation-form" onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
           
@@ -346,7 +372,7 @@ const PropertyValuation = () => {
                     className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
                   >
                     <Save className="w-5 h-5 mr-2" />
-                    {saving ? 'Saving...' : 'Save Valuation'}
+                    {saving ? 'Saving...' : id ? 'Update Valuation' : 'Save Valuation'}
                   </button>
                 </div>
               </div>
