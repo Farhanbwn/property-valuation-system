@@ -16,7 +16,12 @@ const formSchema = z.object({
     holdingNumber: z.string().optional(),
     address: z.string().optional(),
     assessmentDate: z.string().optional(),
-    notes: z.string().optional()
+    notes: z.string().optional(),
+    applicationNo: z.string().optional(),
+    applicationDate: z.string().optional(),
+    jlNo: z.string().optional(),
+    khatianNo: z.string().optional(),
+    lrPlot: z.string().optional()
   }),
   coverAreaSqFt: z.coerce.number().min(0, 'Must be positive'),
   zoneScoreCode: z.string().min(1, 'Required'),
@@ -199,7 +204,39 @@ const PropertyValuation = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-4 text-slate-800">2. Building Information</h2>
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">2. Application & Land Records</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Application No</label>
+                <input type="text" {...register('propertyDetails.applicationNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Application Date</label>
+                <input type="date" {...register('propertyDetails.applicationDate')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">J.L No</label>
+                <input type="text" {...register('propertyDetails.jlNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Khatian No</label>
+                <input type="text" {...register('propertyDetails.khatianNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">L.R. Plot</label>
+                <input type="text" {...register('propertyDetails.lrPlot')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+              </div>
+
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">3. Building Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div>
@@ -271,7 +308,7 @@ const PropertyValuation = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-4 text-slate-800">3. Land Area</h2>
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">4. Land Area</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Bigha</label>

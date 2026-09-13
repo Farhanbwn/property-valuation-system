@@ -13,6 +13,11 @@ export interface IValuationRecord extends Document {
     location?: string;
     assessmentDate?: Date;
     notes?: string;
+    applicationNo?: string;
+    applicationDate?: Date;
+    jlNo?: string;
+    khatianNo?: string;
+    lrPlot?: string;
   };
   inputs: {
     coverAreaSqFt?: number;
@@ -22,7 +27,7 @@ export interface IValuationRecord extends Document {
     optionalFourthScoreCode?: string;
     buildingAgeYears?: number;
     zone?: string;
-    landType?: 'NORMAL' | 'POND';
+    landType?: 'VACANT_LAND' | 'POND';
     landArea: {
       bigha: number;
       khatha: number;
@@ -69,6 +74,11 @@ const ValuationRecordSchema = new Schema(
       location: { type: String },
       assessmentDate: { type: Date },
       notes: { type: String },
+      applicationNo: { type: String },
+      applicationDate: { type: Date },
+      jlNo: { type: String },
+      khatianNo: { type: String },
+      lrPlot: { type: String },
     },
     inputs: {
       coverAreaSqFt: { type: Number },
@@ -78,7 +88,7 @@ const ValuationRecordSchema = new Schema(
       optionalFourthScoreCode: { type: String },
       buildingAgeYears: { type: Number },
       zone: { type: String },
-      landType: { type: String, enum: ['NORMAL', 'POND'] },
+      landType: { type: String, enum: ['VACANT_LAND', 'POND'] },
       landArea: {
         bigha: { type: Number, required: true },
         khatha: { type: Number, required: true },

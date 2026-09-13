@@ -187,7 +187,7 @@ export class ValuationService {
   }
 
   static calculateStandaloneLandValuation(
-    inputs: { zone: string; landArea: { bigha: number; khatha: number; chatak: number; sqFt: number; }; landType: 'NORMAL' | 'POND' },
+    inputs: { zone: string; landArea: { bigha: number; khatha: number; chatak: number; sqFt: number; }; landType: 'VACANT_LAND' | 'POND' },
     rules: IValuationRule
   ) {
     const zoneCode = this.normalizeCode(inputs.zone);

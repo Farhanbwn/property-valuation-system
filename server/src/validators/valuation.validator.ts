@@ -31,7 +31,7 @@ export const propertyValuationInputSchema = z.object({
 export const standaloneLandValuationInputSchema = z.object({
   zone: z.string().min(1, "Zone code is required"),
   landArea: landAreaSchema,
-  landType: z.enum(['NORMAL', 'POND']).default('NORMAL'),
+  landType: z.enum(['VACANT_LAND', 'POND']).default('VACANT_LAND'),
   propertyDetails: z.object({
     holdingNumber: z.string().optional(),
     ownerName: z.string().optional(),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { valuationService } from '../services/api';
 import { Link } from 'react-router-dom';
-import { Eye, Trash2, Edit2 } from 'lucide-react';
+import { Eye, Trash2, Edit2, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ValuationHistory = () => {
@@ -10,11 +10,24 @@ const ValuationHistory = () => {
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
+  const [limit, setLimit] = useState(10);
+  const [isLimitOpen, setIsLimitOpen] = useState(false);
+  const limitOptions = [10, 25, 50, 100];
 
-  const fetchRecords = async (page: number, type: 'ALL' | 'PROPERTY' | 'LAND' = activeTab) => {
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isLimitOpen && !(e.target as Element).closest('.limit-dropdown')) {
+        setIsLimitOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isLimitOpen]);
+
+  const fetchRecords = async (page: number, type: 'ALL' | 'PROPERTY' | 'LAND' = activeTab, currentLimit: number = limit) => {
     try {
       setLoading(true);
-      const res = await valuationService.getHistory(page, 10, type);
+      const res = await valuationService.getHistory(page, currentLimit, type);
       setRecords(res.data.data);
       setPagination({ page: res.data.pagination.page, totalPages: res.data.pagination.totalPages });
     } catch (err) {
@@ -25,8 +38,8 @@ const ValuationHistory = () => {
   };
 
   useEffect(() => {
-    fetchRecords(1, activeTab);
-  }, [activeTab]);
+    fetchRecords(1, activeTab, limit);
+  }, [activeTab, limit]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this valuation?')) {
@@ -141,7 +154,11 @@ const ValuationHistory = () => {
                       ) : (
                         <>
                           <td className="px-6 py-4 text-slate-600">{record.inputs.zone || '-'}</td>
-                          <td className="px-6 py-4 text-slate-600">{record.inputs.landType || '-'}</td>
+                          <td className="px-6 py-4 text-slate-600">{
+                            record.inputs.landType === 'VACANT_LAND' || record.inputs.landType === 'NORMAL' ? 'Vacant Land' 
+                            : record.inputs.landType === 'POND' ? 'Pond' 
+                            : record.inputs.landType || '-'
+                          }</td>
                         </>
                       )
                     )}
@@ -174,25 +191,62 @@ const ValuationHistory = () => {
           </table>
         </div>
         
-        {pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-            <button 
-              disabled={pagination.page === 1} 
-              onClick={() => fetchRecords(pagination.page - 1)}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-slate-500">Page {pagination.page} of {pagination.totalPages}</span>
-            <button 
-              disabled={pagination.page === pagination.totalPages} 
-              onClick={() => fetchRecords(pagination.page + 1)}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
-            >
-              Next
-            </button>
+        <div className="px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center text-sm text-slate-500 limit-dropdown relative">
+            <span className="mr-2">Show</span>
+            <div className="relative">
+              <button 
+                onClick={() => setIsLimitOpen(!isLimitOpen)}
+                className="flex items-center justify-between w-18 border border-slate-300 rounded-lg py-1.5 px-3 text-sm font-medium text-slate-700 bg-white shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              >
+                {limit}
+                <ChevronDown className={`w-4 h-4 text-slate-400 ml-1 transition-transform ${isLimitOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isLimitOpen && (
+                <div className="absolute bottom-full left-0 mb-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-10 py-1">
+                  {limitOptions.map(opt => (
+                    <button
+                      key={opt}
+                      onClick={() => {
+                        setLimit(opt);
+                        setIsLimitOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
+                        limit === opt 
+                          ? 'bg-primary/10 text-primary font-medium' 
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <span className="ml-2">entries</span>
           </div>
-        )}
+
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center space-x-4">
+              <button 
+                disabled={pagination.page === 1} 
+                onClick={() => fetchRecords(pagination.page - 1)}
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-slate-500">Page {pagination.page} of {pagination.totalPages}</span>
+              <button 
+                disabled={pagination.page === pagination.totalPages} 
+                onClick={() => fetchRecords(pagination.page + 1)}
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

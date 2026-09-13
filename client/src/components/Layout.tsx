@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calculator, Map, History, Settings, Menu, X, LogOut, Users } from 'lucide-react';
+import { Home, Calculator, Map, History, Settings, Menu, X, LogOut, Users, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import logo from '../assets/logo.png';
@@ -21,6 +21,7 @@ const Layout = () => {
     { name: 'Property Valuation', href: '/property-valuation', icon: Calculator },
     { name: 'Land Valuation', href: '/land-valuation', icon: Map },
     { name: 'History', href: '/valuation-history', icon: History },
+    { name: 'Reports', href: '/reports', icon: FileText },
     { name: 'Rules Config', href: '/settings/valuation-rules', icon: Settings },
     { name: 'Settings', href: '/settings', icon: Settings, exact: true },
   ];

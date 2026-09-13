@@ -78,6 +78,21 @@ const ValuationDetail = () => {
                   <p><span className="text-slate-500 block text-xs">Ward No</span> <span className="text-slate-900">{record.property.ward || 'N/A'}</span></p>
                 </div>
               </div>
+
+              <h3 className="font-semibold text-slate-700 mb-3 print:mb-2 mt-6 flex items-center uppercase tracking-wider text-xs">
+                <MapIcon className="w-4 h-4 mr-2" /> Application & Land Records
+              </h3>
+              <div className="grid grid-cols-2 gap-4 print:gap-2">
+                <div className="space-y-2 print:space-y-1">
+                  <p><span className="text-slate-500 block text-xs">Application No</span> <span className="text-slate-900">{record.property.applicationNo || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">App Date</span> <span className="text-slate-900">{record.property.applicationDate ? new Date(record.property.applicationDate).toLocaleDateString('en-GB') : 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">L.R. Plot</span> <span className="text-slate-900">{record.property.lrPlot || 'N/A'}</span></p>
+                </div>
+                <div className="space-y-2 print:space-y-1">
+                  <p><span className="text-slate-500 block text-xs">J.L No</span> <span className="text-slate-900">{record.property.jlNo || 'N/A'}</span></p>
+                  <p><span className="text-slate-500 block text-xs">Khatian No</span> <span className="text-slate-900">{record.property.khatianNo || 'N/A'}</span></p>
+                </div>
+              </div>
             </div>
             <div>
               <h3 className="font-semibold text-slate-700 mb-3 print:mb-2 flex items-center uppercase tracking-wider text-xs">
@@ -90,7 +105,11 @@ const ValuationDetail = () => {
                     <p><span className="text-slate-500 block text-xs">Zone</span> <span className="font-medium text-slate-900">{record.inputs.zone}</span></p>
                   </div>
                   <div className="space-y-2 print:space-y-1">
-                    <p><span className="text-slate-500 block text-xs">Land Type</span> <span className="font-medium text-slate-900">{record.inputs.landType}</span></p>
+                    <p><span className="text-slate-500 block text-xs">Land Type</span> <span className="font-medium text-slate-900">{
+                      record.inputs.landType === 'VACANT_LAND' || record.inputs.landType === 'NORMAL' ? 'Vacant Land'
+                      : record.inputs.landType === 'POND' ? 'Pond'
+                      : record.inputs.landType
+                    }</span></p>
                   </div>
                 </div>
               ) : (
@@ -123,7 +142,7 @@ const ValuationDetail = () => {
                 <div className="bg-white p-5 print:p-4 rounded-lg border border-slate-200">
                   <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 print:mb-2 border-b border-slate-100 pb-2">Land Value Breakdown</h4>
                   <div className="space-y-2 print:space-y-1 text-sm print:text-xs">
-                    <div className="flex justify-between"><span className="text-slate-600">Normal Land Valuation</span><span className="font-medium">{formatCurrency(record.calculationBreakdown.normalLandValuation || 0)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-600">Vacant Land Valuation</span><span className="font-medium">{formatCurrency(record.calculationBreakdown.normalLandValuation || 0)}</span></div>
                     {record.calculationBreakdown.pondAdjustment > 0 && (
                       <div className="flex justify-between text-red-600">
                         <span>Pond Adjustment (50%)</span>
