@@ -24,7 +24,12 @@ export const propertyValuationInputSchema = z.object({
     ward: z.coerce.number().optional(),
     location: z.string().optional(),
     assessmentDate: z.string().optional(),
-    notes: z.string().optional()
+    notes: z.string().optional(),
+    applicationNo: z.string().optional(),
+    applicationDate: z.string().optional(),
+    jlNo: z.string().optional(),
+    khatianNo: z.string().optional(),
+    lrPlot: z.string().optional()
   }).optional()
 });
 
@@ -41,6 +46,11 @@ export const standaloneLandValuationInputSchema = z.object({
     ward: z.coerce.number().optional(),
     location: z.string().optional(),
     assessmentDate: z.string().optional(),
-    notes: z.string().optional()
+    notes: z.string().optional(),
+    applicationNo: z.string().optional(),
+    applicationDate: z.string().optional(),
+    jlNo: z.string().optional(),
+    khatianNo: z.string().optional(),
+    lrPlot: z.string().optional()
   }).optional()
 });

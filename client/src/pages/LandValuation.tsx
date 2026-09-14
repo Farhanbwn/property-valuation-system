@@ -14,6 +14,8 @@ const formSchema = z.object({
     ward: z.coerce.number().optional(),
     location: z.string().optional(),
     holdingNumber: z.string().optional(),
+    assessmentDate: z.string().optional(),
+    notes: z.string().optional(),
     applicationNo: z.string().optional(),
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
@@ -41,6 +43,8 @@ const LandValuation = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const today = new Date().toISOString().split('T')[0];
+
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -67,8 +71,16 @@ const LandValuation = () => {
         if (id) {
           valuationService.getValuationById(id).then(recordRes => {
             const d = recordRes.data.data;
+            const propertyDetails = { ...(d.property || {}) };
+            if (propertyDetails.applicationDate) {
+              propertyDetails.applicationDate = propertyDetails.applicationDate.substring(0, 10);
+            }
+            if (propertyDetails.assessmentDate) {
+              propertyDetails.assessmentDate = propertyDetails.assessmentDate.substring(0, 10);
+            }
+            
             reset({
-              propertyDetails: d.property || {},
+              propertyDetails: propertyDetails,
               zone: d.inputs.zone,
               landType: d.inputs.landType,
               landArea: d.inputs.landArea || { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
@@ -194,7 +206,7 @@ const LandValuation = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Application Date</label>
-                <input type="date" {...register('propertyDetails.applicationDate')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+                <input type="date" max={watchAllFields.propertyDetails?.assessmentDate || today} {...register('propertyDetails.applicationDate')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
 
               <div>

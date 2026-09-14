@@ -49,6 +49,8 @@ const PropertyValuation = () => {
   const [calculating, setCalculating] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const today = new Date().toISOString().split('T')[0];
+
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useRHForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -71,8 +73,16 @@ const PropertyValuation = () => {
         if (id) {
           valuationService.getValuationById(id).then(recordRes => {
             const d = recordRes.data.data;
+            const propertyDetails = { ...(d.property || {}) };
+            if (propertyDetails.applicationDate) {
+              propertyDetails.applicationDate = propertyDetails.applicationDate.substring(0, 10);
+            }
+            if (propertyDetails.assessmentDate) {
+              propertyDetails.assessmentDate = propertyDetails.assessmentDate.substring(0, 10);
+            }
+            
             reset({
-              propertyDetails: d.property || {},
+              propertyDetails: propertyDetails,
               coverAreaSqFt: d.inputs.coverAreaSqFt,
               zoneScoreCode: d.inputs.zoneScoreCode,
               useOrCommercialScoreCode: d.inputs.useOrCommercialScoreCode,
@@ -214,7 +224,7 @@ const PropertyValuation = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Application Date</label>
-                <input type="date" {...register('propertyDetails.applicationDate')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+                <input type="date" max={watchAllFields.propertyDetails?.assessmentDate || today} {...register('propertyDetails.applicationDate')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
 
               <div>

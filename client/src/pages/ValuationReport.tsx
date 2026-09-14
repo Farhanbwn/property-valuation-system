@@ -169,7 +169,7 @@ const ValuationReport = () => {
 
       {/* Report View - Shown on screen and in print */}
       {(hasSearched || records.length > 0) && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print:shadow-none print:border-none">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print:shadow-none print:border-none print:overflow-visible">
 
           {/* Print Header - Only visible when printing or as part of the report */}
           <div className="hidden print:block p-4 text-center mb-4">
@@ -181,7 +181,7 @@ const ValuationReport = () => {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto print:overflow-visible">
             <table className="w-full text-left text-sm print:text-xs">
               <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 print:bg-white print:border-black print:border-b-2">
                 <tr>
@@ -214,7 +214,7 @@ const ValuationReport = () => {
                     const sc = r.calculationBreakdown.commercialSurcharge || 0;
 
                     return (
-                      <tr key={r._id} className="hover:bg-slate-50 transition-colors print:hover:bg-white">
+                      <tr key={r._id} className="hover:bg-slate-50 transition-colors print:hover:bg-white print:break-inside-avoid">
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{index + 1}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{r.property?.applicationNo || '-'}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{formatDate(r.property?.applicationDate)}</td>
