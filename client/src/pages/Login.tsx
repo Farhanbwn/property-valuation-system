@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import bgImage from '../assets/bg_image.png';
+import logoBgB from '../assets/logo_bg_b.png';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -97,6 +98,27 @@ const Login = () => {
       <div className="w-full z-20 bg-white">
         <Footer />
       </div>
+
+      {loading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-md transition-all duration-300">
+          <div className="bg-white rounded-2xl border-4 border-slate-900 shadow-[10px_10px_0px_0px_rgba(15,23,42,1)] p-10 md:p-12 max-w-lg w-11/12 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-white p-4 md:p-5 rounded-2xl border-2 border-slate-900 shadow-md mb-6 flex items-center justify-center">
+              <img 
+                src={logoBgB} 
+                alt="Burdwan Property Logo" 
+                className="h-24 md:h-28 w-auto object-contain animate-pulse" 
+              />
+            </div>
+            <div className="flex items-center gap-3 text-slate-900 font-black text-2xl md:text-3xl mb-3">
+              <Loader2 className="h-7 w-7 stroke-[2.5] animate-spin text-blue-600" />
+              <span>{isLogin ? 'Logging in...' : 'Creating Account...'}</span>
+            </div>
+            <p className="text-sm md:text-base text-slate-600 font-medium max-w-xs">
+              Authenticating user credentials. Please wait...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

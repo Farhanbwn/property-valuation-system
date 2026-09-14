@@ -16,11 +16,12 @@ export const valuationService = {
   getRules: () => api.get('/valuations/rules'),
   calculatePropertyValuation: (data: any) => api.post('/valuations/calculate', data),
   savePropertyValuation: (data: any) => api.post('/valuations', data),
-  getHistory: (page = 1, limit = 10, type?: 'ALL' | 'PROPERTY' | 'LAND', startDate?: string, endDate?: string) => {
+  getHistory: (page = 1, limit = 10, type?: 'ALL' | 'PROPERTY' | 'LAND', startDate?: string, endDate?: string, search?: string) => {
     let url = `/valuations?page=${page}&limit=${limit}`;
     if (type && type !== 'ALL') url += `&type=${type}`;
     if (startDate) url += `&startDate=${startDate}`;
     if (endDate) url += `&endDate=${endDate}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
     return api.get(url);
   },
   getValuationById: (id: string) => api.get(`/valuations/${id}`),

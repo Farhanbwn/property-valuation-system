@@ -34,7 +34,7 @@ const Layout = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
       
       {/* Mobile Header */}
-      <div className="md:hidden bg-secondary text-white p-4 flex items-center justify-between z-20">
+      <div className="md:hidden print:hidden bg-secondary text-white p-4 flex items-center justify-between z-20">
         <div>
           <h1 className="text-lg font-bold tracking-tight">Score & Valuation</h1>
         </div>
@@ -52,7 +52,7 @@ const Layout = () => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-secondary text-white no-print z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col h-screen ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-secondary text-white print:hidden z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col h-screen ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 hidden md:flex md:flex-col md:items-center md:justify-center flex-shrink-0">
           <img src={logo} alt="BWNPLVC Logo" className="w-24 h-auto mb-2 object-contain" />
           <h1 className="text-xl font-bold tracking-tight text-white">BWNPLVC</h1>

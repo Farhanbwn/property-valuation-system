@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { valuationService } from '../services/api';
 import { Printer, Search } from 'lucide-react';
+import logoPrint from '../assets/logo_bg_b.png';
 
 const ValuationReport = () => {
   const [startDate, setStartDate] = useState('');
@@ -51,7 +52,10 @@ const ValuationReport = () => {
     try {
       // Fetch up to 1000 records for the report
       const res = await valuationService.getHistory(1, 1000, type, startDate, endDate);
-      setRecords(res.data.data);
+      const sortedRecords = [...res.data.data].sort((a, b) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+      setRecords(sortedRecords);
     } catch (err) {
       console.error(err);
       alert('Failed to fetch report data.');
@@ -172,12 +176,15 @@ const ValuationReport = () => {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print:shadow-none print:border-none print:overflow-visible">
 
           {/* Print Header - Only visible when printing or as part of the report */}
-          <div className="hidden print:block p-4 text-center mb-4">
-            <h2 className="text-xl font-bold uppercase">Valuation Report</h2>
-            <p className="text-sm text-slate-600">
-              {startDate && endDate ? `From: ${formatDate(startDate)} To: ${formatDate(endDate)}` :
-                startDate ? `From: ${formatDate(startDate)}` :
-                  endDate ? `To: ${formatDate(endDate)}` : 'All Dates'}
+          <div className="hidden print:flex flex-col items-center justify-center text-center mb-8">
+            <img src={logoPrint} alt="Burdwan Property & Land Valuation" className="w-32 h-auto mb-4 object-contain" />
+            <h1 className="text-2xl font-bold uppercase tracking-tight text-black mb-2">
+              BURDWAN PROPERTY & LAND VALUATION
+            </h1>
+            <p className="text-sm text-slate-700 font-medium">
+              Valuation Report {startDate && endDate ? `(From: ${formatDate(startDate)} To: ${formatDate(endDate)})` :
+                startDate ? `(From: ${formatDate(startDate)})` :
+                  endDate ? `(To: ${formatDate(endDate)})` : ''}
             </p>
           </div>
 

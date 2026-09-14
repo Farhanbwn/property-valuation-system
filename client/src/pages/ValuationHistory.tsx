@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { valuationService } from '../services/api';
 import { Link } from 'react-router-dom';
-import { Eye, Trash2, Edit2, ChevronDown } from 'lucide-react';
+import { Eye, Trash2, Edit2, ChevronDown, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ValuationHistory = () => {
@@ -13,6 +13,7 @@ const ValuationHistory = () => {
   const [limit, setLimit] = useState(10);
   const [isLimitOpen, setIsLimitOpen] = useState(false);
   const limitOptions = [10, 25, 50, 100];
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -24,10 +25,10 @@ const ValuationHistory = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isLimitOpen]);
 
-  const fetchRecords = async (page: number, type: 'ALL' | 'PROPERTY' | 'LAND' = activeTab, currentLimit: number = limit) => {
+  const fetchRecords = async (page: number, type: 'ALL' | 'PROPERTY' | 'LAND' = activeTab, currentLimit: number = limit, query: string = searchTerm) => {
     try {
       setLoading(true);
-      const res = await valuationService.getHistory(page, currentLimit, type);
+      const res = await valuationService.getHistory(page, currentLimit, type, undefined, undefined, query);
       setRecords(res.data.data);
       setPagination({ page: res.data.pagination.page, totalPages: res.data.pagination.totalPages });
     } catch (err) {
@@ -38,8 +39,11 @@ const ValuationHistory = () => {
   };
 
   useEffect(() => {
-    fetchRecords(1, activeTab, limit);
-  }, [activeTab, limit]);
+    const delayDebounceFn = setTimeout(() => {
+      fetchRecords(1, activeTab, limit, searchTerm);
+    }, 400);
+    return () => clearTimeout(delayDebounceFn);
+  }, [activeTab, limit, searchTerm]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this valuation?')) {
@@ -57,8 +61,18 @@ const ValuationHistory = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <h1 className="text-2xl font-bold text-slate-900">Valuation History</h1>
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search App No, Name..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
       </div>
 
       <div className="flex justify-center mb-2">

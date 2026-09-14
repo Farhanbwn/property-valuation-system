@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { valuationService } from '../services/api';
 import { Printer, ArrowLeft, Building2, Map as MapIcon, Calculator } from 'lucide-react';
+import logoPrint from '../assets/logo_bg_b.png';
 
 const ValuationDetail = () => {
   const { id } = useParams();
@@ -44,19 +45,30 @@ const ValuationDetail = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-border overflow-hidden">
-        <div className="p-8 print:p-4 border-b border-slate-200">
-          <div className="flex justify-between items-start mb-6 print:mb-4">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none overflow-hidden">
+        {/* Print Header */}
+        <div className="hidden print:flex flex-col items-center justify-center text-center pb-6 mb-6 border-b-2 border-black">
+          <img src={logoPrint} alt="Burdwan Property & Land Valuation" className="w-32 h-auto mb-4 object-contain" />
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-black mb-2">
+            BURDWAN PROPERTY & LAND VALUATION
+          </h1>
+          <p className="text-sm font-semibold text-slate-800">
+            {record.valuationType === 'LAND' ? 'STANDALONE LAND VALUATION REPORT' : 'PROPERTY VALUATION REPORT'}
+          </p>
+        </div>
+
+        <div className="p-8 print:p-0 print:border-none border-b border-slate-200">
+          <div className="flex justify-between items-end mb-6 print:mb-6">
             <div>
-              <h1 className="text-3xl print:text-2xl font-bold text-slate-900">
+              <h1 className="text-3xl font-bold text-slate-900 print:hidden">
                 {record.valuationType === 'LAND' ? 'STANDALONE LAND VALUATION REPORT' : 'PROPERTY VALUATION REPORT'}
               </h1>
-              <p className="text-slate-500 mt-1">ID: {record._id.substring(0, 8).toUpperCase()}</p>
+              <p className="text-slate-500 mt-1 print:text-xs">ID: <span className="font-medium text-slate-900">{record._id.substring(0, 8).toUpperCase()}</span></p>
             </div>
             <div className="text-right text-sm print:text-xs text-slate-500 space-y-1">
-              <p>Date: {new Date(record.createdAt).toLocaleDateString('en-GB')}</p>
-              <p>Rules Version: {record.rulesVersion}</p>
-              <p>Mode: {record.calculationMode}</p>
+              <p>Date: <span className="font-medium text-slate-900">{new Date(record.createdAt).toLocaleDateString('en-GB')}</span></p>
+              <p>Rules Version: <span className="font-medium text-slate-900">{record.rulesVersion}</span></p>
+              <p>Mode: <span className="font-medium text-slate-900">{record.calculationMode}</span></p>
             </div>
           </div>
 

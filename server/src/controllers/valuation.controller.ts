@@ -208,6 +208,15 @@ export const getValuationHistory = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    const search = req.query.search as string;
+    if (search) {
+      query.$or = [
+        { 'property.ownerName': { $regex: search, $options: 'i' } },
+        { 'property.applicationNo': { $regex: search, $options: 'i' } },
+        { 'property.holdingNumber': { $regex: search, $options: 'i' } },
+      ];
+    }
+
     const records = await ValuationRecord.find(query)
       .populate('userId', 'name email')
       .sort({ createdAt: -1 })
