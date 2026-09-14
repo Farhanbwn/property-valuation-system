@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
 import { Calculator, Save, AlertCircle } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 const formSchema = z.object({
   propertyDetails: z.object({
@@ -41,6 +41,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const PropertyValuation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const [rules, setRules] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +97,35 @@ const PropertyValuation = () => {
             setError('Failed to load existing valuation.');
             setLoading(false);
           });
+        } else if (location.state?.importedInspection) {
+          const d = location.state.importedInspection;
+          reset({
+            propertyDetails: {
+              applicationNo: d.applicationNo || '',
+              applicationDate: d.applicationDate ? d.applicationDate.substring(0, 10) : today,
+              ownerName: d.ownerName || '',
+              district: d.district || 'Purba Bardhaman',
+              ulbName: d.ulbName || 'Burdwan Municipality',
+              ward: d.ward || '',
+              location: d.location || '',
+              holdingNumber: d.holdingNumber || '',
+              jlNo: d.jlNo || '',
+              khatianNo: d.khatianNo || '',
+              lrPlot: d.lrPlot || '',
+              notes: d.remark ? `Imported from Inspection Book. Remark: ${d.remark}` : 'Imported from Inspection Book.'
+            },
+            coverAreaSqFt: d.coverAreaSqFt || 0,
+            zoneScoreCode: '',
+            useOrCommercialScoreCode: d.natureOfUseCode || '',
+            constructionScoreCode: d.constructionScoreCode || '',
+            optionalFourthScoreCode: '',
+            buildingAgeYears: d.buildingAgeYears || 0,
+            landArea: d.landArea || { bigha: 0, khatha: 0, chatak: 0, sqFt: 0 }
+          });
+          
+          // Clear state so refresh doesn't overwrite
+          window.history.replaceState({}, '');
+          setLoading(false);
         } else {
           setLoading(false);
         }
@@ -104,7 +134,7 @@ const PropertyValuation = () => {
         setError('Failed to load valuation rules. Ensure database is seeded and running.');
         setLoading(false);
       });
-  }, [id, reset]);
+  }, [id, reset, location.state]);
 
   const selectedWard = watch('propertyDetails.ward');
   useEffect(() => {

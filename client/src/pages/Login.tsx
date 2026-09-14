@@ -30,6 +30,10 @@ const Login = () => {
     try {
       if (isLogin) {
         const response = await authService.login({ email, password });
+        if (response.data.user.role === 'inspection') {
+          setError('Inspection users must use the Inspection Portal.');
+          return;
+        }
         login(response.data.token, response.data.user);
         navigate('/dashboard');
       } else {
@@ -60,7 +64,7 @@ const Login = () => {
               <span className="card-side" />
               <div className="flip-card__inner">
                 <div className="flip-card__front">
-                  <div className="title">Log in</div>
+                  <div className="title">BWNPLVC <br/> LOGIN</div>
                   <form className="flip-card__form" onSubmit={handleSubmit}>
                     <input className="flip-card__input" name="email" placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
                     <div className="input-container">

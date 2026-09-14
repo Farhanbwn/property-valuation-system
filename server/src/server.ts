@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import valuationRoutes from './routes/valuation.routes';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/user.routes';
+import inspectionRoutes from './routes/inspection.routes';
 import { User } from './models/User';
 import bcrypt from 'bcryptjs';
 
@@ -32,6 +33,7 @@ app.use('/api', limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/valuations', valuationRoutes);
+app.use('/api/inspections', inspectionRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

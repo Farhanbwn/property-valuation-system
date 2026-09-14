@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calculator, Map, History, Settings, Menu, X, LogOut, Users, FileText } from 'lucide-react';
+import { Home, FileEdit, ClipboardList, Settings, Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import logo from '../assets/logo.png';
 
-const Layout = () => {
+const InspectionLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
@@ -13,24 +13,15 @@ const Layout = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/inspection-login');
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Property Valuation', href: '/property-valuation', icon: Calculator },
-    { name: 'Land Valuation', href: '/land-valuation', icon: Map },
-    { name: 'History', href: '/valuation-history', icon: History },
-    { name: 'Reports', href: '/reports', icon: FileText },
-    { name: 'Rules Config', href: '/settings/valuation-rules', icon: Settings },
-    { name: 'Settings', href: '/settings', icon: Settings, exact: true },
+    { name: 'Dashboard', href: '/inspection/dashboard', icon: Home, exact: true },
+    { name: 'Inspection Book', href: '/inspection/book', icon: FileEdit },
+    { name: 'Inspection List', href: '/inspection/list', icon: ClipboardList },
+    { name: 'Settings', href: '/inspection/settings', icon: Settings, exact: true },
   ];
-
-  if (user?.role === 'admin') {
-    navigation.push({ name: 'User Management', href: '/users', icon: Users });
-  } else if (user?.role === 'user') {
-    navigation.splice(1, 0, { name: 'Field Inspections', href: '/field-inspections', icon: Users });
-  }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
@@ -38,7 +29,7 @@ const Layout = () => {
       {/* Mobile Header */}
       <div className="md:hidden print:hidden bg-secondary text-white p-4 flex items-center justify-between z-20">
         <div>
-          <h1 className="text-lg font-bold tracking-tight">Score & Valuation</h1>
+          <h1 className="text-lg font-bold tracking-tight">Inspection Portal</h1>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 -mr-2">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -56,8 +47,8 @@ const Layout = () => {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 w-64 bg-secondary text-white print:hidden z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col h-screen ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 hidden md:flex md:flex-col md:items-center md:justify-center flex-shrink-0">
-          <img src={logo} alt="BWNPLVC Logo" className="w-24 h-auto mb-2 object-contain" />
-          <h1 className="text-xl font-bold tracking-tight text-white">BWNPLVC</h1>
+          <img src={logo} alt="Inspection Portal Logo" className="w-24 h-auto mb-2 object-contain" />
+          <h1 className="text-xl font-bold tracking-tight text-white text-center">Inspection Portal</h1>
         </div>
         <nav className="mt-2 flex-1 overflow-y-auto">
           {navigation.map((item) => {
@@ -87,7 +78,7 @@ const Layout = () => {
           {user && (
             <div className="mb-4 px-2">
               <p className="text-sm font-semibold truncate" title={user.name}>
-                <span className="text-slate-400 font-normal">Account:</span> {user.name}
+                <span className="text-slate-400 font-normal">Inspector:</span> {user.name}
               </p>
               <p className="text-xs text-slate-400 truncate mt-1" title={user.email}>{user.email}</p>
             </div>
@@ -114,4 +105,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default InspectionLayout;

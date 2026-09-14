@@ -40,5 +40,18 @@ export const authService = {
 
 export const userService = {
   getUsers: () => api.get('/users'),
+  getMyInspectors: () => api.get('/users/my-inspectors'),
   changePassword: (data: any) => api.put('/users/password', data),
+  resetUserPassword: (id: string, data: any) => api.put(`/users/${id}/password`, data),
+  createUser: (data: any) => api.post('/users', data),
+  deleteUser: (id: string) => api.delete(`/users/${id}`),
+};
+
+export const inspectionService = {
+  createInspection: (data: any) => api.post('/inspections', data),
+  getMyInspections: () => api.get('/inspections/my-inspections'),
+  getTeamInspections: () => api.get('/inspections/team-inspections'),
+  getInspectionById: (id: string) => api.get(`/inspections/${id}`),
+  updateInspection: (id: string, data: any) => api.put(`/inspections/${id}`, data),
+  deleteInspection: (id: string) => api.delete(`/inspections/${id}`),
 };
