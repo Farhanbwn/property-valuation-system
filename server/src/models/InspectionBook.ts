@@ -27,7 +27,7 @@ export interface IInspectionBook extends Document {
   };
   noOfFloor: string; // roman numerals I to XXV
   remark: string;
-  status: 'submitted' | 'reviewed';
+  status: 'draft' | 'submitted' | 'reviewed';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,7 +60,7 @@ const InspectionBookSchema: Schema = new Schema(
     },
     noOfFloor: { type: String },
     remark: { type: String },
-    status: { type: String, enum: ['submitted', 'reviewed'], default: 'submitted' }
+    status: { type: String, enum: ['draft', 'submitted', 'reviewed'], default: 'draft' }
   },
   { timestamps: true }
 );

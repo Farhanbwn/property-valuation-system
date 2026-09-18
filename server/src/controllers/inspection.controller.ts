@@ -20,7 +20,7 @@ export const createInspection = async (req: AuthRequest, res: Response) => {
       ...req.body,
       inspectorId,
       parentUserId: inspector.parentUserId,
-      status: 'submitted'
+      status: 'draft'
     };
 
     const newInspection = new InspectionBook(inspectionData);
@@ -55,7 +55,10 @@ export const getTeamInspections = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
-    const inspections = await InspectionBook.find({ parentUserId: userId })
+    const inspections = await InspectionBook.find({ 
+      parentUserId: userId,
+      status: { $in: ['submitted', 'reviewed'] }
+    })
       .populate('inspectorId', 'name email')
       .sort({ createdAt: -1 });
       
@@ -111,10 +114,14 @@ export const updateInspection = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ success: false, message: 'Forbidden: You can only edit your own inspections' });
     }
 
+    if (inspection.status !== 'draft') {
+      return res.status(403).json({ success: false, message: 'Forbidden: Cannot edit an inspection that has already been submitted' });
+    }
+
     const updatedInspection = await InspectionBook.findByIdAndUpdate(
       id,
       { $set: req.body },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     res.json({ success: true, data: updatedInspection });
@@ -143,11 +150,85 @@ export const deleteInspection = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ success: false, message: 'Forbidden: You can only delete your own inspections' });
     }
 
+    if (inspection.status !== 'draft') {
+      return res.status(403).json({ success: false, message: 'Forbidden: Cannot delete an inspection that has already been submitted' });
+    }
+
     await InspectionBook.findByIdAndDelete(id);
 
     res.json({ success: true, message: 'Inspection deleted successfully' });
   } catch (error) {
     console.error('Error deleting inspection:', error);
     res.status(500).json({ success: false, message: 'Server error while deleting inspection' });
+  }
+};
+
+export const submitInspectionsBatch = async (req: AuthRequest, res: Response) => {
+  try {
+    const inspectorId = req.user?.id;
+    const { inspectionIds } = req.body;
+    
+    if (!inspectorId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    if (!Array.isArray(inspectionIds) || inspectionIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'Please provide an array of inspection IDs' });
+    }
+
+    // Update all provided inspections that belong to this inspector and are in 'draft' status
+    const result = await InspectionBook.updateMany(
+      { 
+        _id: { $in: inspectionIds },
+        inspectorId,
+        status: 'draft' 
+      },
+      { $set: { status: 'submitted' } }
+    );
+
+    res.json({ 
+      success: true, 
+      message: `${result.modifiedCount} inspections submitted successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Error batch submitting inspections:', error);
+    res.status(500).json({ success: false, message: 'Server error while submitting inspections' });
+  }
+};
+
+export const getMyStats = async (req: AuthRequest, res: Response) => {
+  try {
+    const inspectorId = req.user?.id;
+    
+    if (!inspectorId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const [draftsCount, pendingCount, completedCount] = await Promise.all([
+      InspectionBook.countDocuments({ inspectorId, status: 'draft' }),
+      InspectionBook.countDocuments({ inspectorId, status: 'submitted' }),
+      InspectionBook.countDocuments({ 
+        inspectorId, 
+        status: 'reviewed',
+        createdAt: { $gte: startOfMonth }
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        drafts: draftsCount,
+        pending: pendingCount,
+        completed: completedCount
+      }
+    });
+  } catch (error) {
+    console.error('Error getting inspection stats:', error);
+    res.status(500).json({ success: false, message: 'Server error while fetching stats' });
   }
 };

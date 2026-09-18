@@ -54,4 +54,6 @@ export const inspectionService = {
   getInspectionById: (id: string) => api.get(`/inspections/${id}`),
   updateInspection: (id: string, data: any) => api.put(`/inspections/${id}`, data),
   deleteInspection: (id: string) => api.delete(`/inspections/${id}`),
+  submitInspectionsBatch: (inspectionIds: string[]) => api.put('/inspections/batch-submit', { inspectionIds }),
+  getDashboardStats: () => api.get('/inspections/my-stats'),
 };

@@ -18,6 +18,8 @@ export interface IValuationRecord extends Document {
     jlNo?: string;
     khatianNo?: string;
     lrPlot?: string;
+    effectFrom?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+    effectYear?: string;
   };
   inputs: {
     coverAreaSqFt?: number;
@@ -79,6 +81,8 @@ const ValuationRecordSchema = new Schema(
       jlNo: { type: String },
       khatianNo: { type: String },
       lrPlot: { type: String },
+      effectFrom: { type: String, enum: ['Q1', 'Q2', 'Q3', 'Q4'] },
+      effectYear: { type: String },
     },
     inputs: {
       coverAreaSqFt: { type: Number },

@@ -21,7 +21,7 @@ const formSchema = z.object({
     jlNo: z.string().optional(),
     khatianNo: z.string().optional(),
     lrPlot: z.string().optional(),
-    effectFrom: z.enum(['Q1', 'Q2', 'Q3', 'Q4'], { required_error: 'Required' }),
+    effectFrom: z.enum(['Q1', 'Q2', 'Q3', 'Q4'], { required_error: 'Required', invalid_type_error: 'Required' }),
     effectYear: z.string().min(1, 'Required')
   }),
   zone: z.string().min(1, 'Zone is required'),
@@ -374,6 +374,11 @@ const LandValuation = () => {
                 </div>
 
                 <div className="pt-6">
+                  {Object.keys(errors).length > 0 && (
+                    <p className="text-red-500 text-xs text-center mb-3 font-medium bg-red-50 py-2 rounded border border-red-100">
+                      Please fill in all mandatory fields before saving.
+                    </p>
+                  )}
                   <button 
                     form="land-valuation-form"
                     type="submit" 

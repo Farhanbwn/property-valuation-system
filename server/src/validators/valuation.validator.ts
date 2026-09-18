@@ -29,7 +29,9 @@ export const propertyValuationInputSchema = z.object({
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
     khatianNo: z.string().optional(),
-    lrPlot: z.string().optional()
+    lrPlot: z.string().optional(),
+    effectFrom: z.enum(['', 'Q1', 'Q2', 'Q3', 'Q4']).optional(),
+    effectYear: z.string().optional()
   }).optional()
 });
 
@@ -51,6 +53,8 @@ export const standaloneLandValuationInputSchema = z.object({
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
     khatianNo: z.string().optional(),
-    lrPlot: z.string().optional()
+    lrPlot: z.string().optional(),
+    effectFrom: z.enum(['', 'Q1', 'Q2', 'Q3', 'Q4']).optional(),
+    effectYear: z.string().optional()
   }).optional()
 });

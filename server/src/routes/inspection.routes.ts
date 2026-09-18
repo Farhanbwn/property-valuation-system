@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createInspection, getMyInspections, getTeamInspections, getInspectionById, updateInspection, deleteInspection } from '../controllers/inspection.controller';
+import { createInspection, getMyInspections, getTeamInspections, getInspectionById, updateInspection, deleteInspection, submitInspectionsBatch, getMyStats } from '../controllers/inspection.controller';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -10,6 +10,9 @@ router.get('/my-inspections', authenticate, getMyInspections);
 
 // Used by user role (standard users)
 router.get('/team-inspections', authenticate, getTeamInspections);
+
+router.get('/my-stats', authenticate, getMyStats);
+router.put('/batch-submit', authenticate, submitInspectionsBatch);
 
 router.get('/:id', authenticate, getInspectionById);
 router.put('/:id', authenticate, updateInspection);

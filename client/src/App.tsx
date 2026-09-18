@@ -16,6 +16,7 @@ import InspectionLogin from './pages/InspectionLogin';
 import InspectionDashboard from './pages/InspectionDashboard';
 import InspectionBook from './pages/InspectionBook';
 import InspectionList from './pages/InspectionList';
+import InspectionSubmission from './pages/InspectionSubmission';
 import FieldInspections from './pages/FieldInspections';
 import { useAuth } from './context/AuthContext';
 
@@ -80,6 +81,7 @@ function App() {
           <Route path="dashboard" element={<InspectionDashboard />} />
           <Route path="book/:id?" element={<InspectionBook />} />
           <Route path="list" element={<InspectionList />} />
+          <Route path="submit" element={<InspectionSubmission />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

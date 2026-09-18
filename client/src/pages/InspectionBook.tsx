@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService, inspectionService } from '../services/api';
-import { Save, CheckCircle2 } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Save, CheckCircle2, Printer, ArrowLeft } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
 const ROMAN_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV'];
 
@@ -45,6 +45,7 @@ const InspectionBook = () => {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -71,6 +72,9 @@ const InspectionBook = () => {
             const d = recordRes.data.data;
             if (d.applicationDate) {
               d.applicationDate = d.applicationDate.substring(0, 10);
+            }
+            if (d.status && d.status !== 'draft') {
+              setIsReadOnly(true);
             }
             reset(d);
             setLoading(false);
@@ -130,9 +134,35 @@ const InspectionBook = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 relative">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-900">Inspection Book</h1>
+      <div className="flex justify-between items-center print:hidden">
+        <h1 className="text-2xl font-bold text-slate-900">
+          {isReadOnly ? 'Inspection Preview' : 'Inspection Book'}
+        </h1>
+        {isReadOnly && (
+          <div className="flex space-x-3">
+            <Link 
+              to="/inspection/list"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Link>
+            <button 
+              onClick={() => window.print()}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+            >
+              <Printer className="w-4 h-4 mr-2" />
+              Print
+            </button>
+          </div>
+        )}
       </div>
+
+      {isReadOnly && (
+        <div className="bg-blue-50 text-blue-800 p-4 rounded-lg border border-blue-200 text-sm mb-6 print:hidden">
+          This inspection has been submitted and is currently in <strong>read-only</strong> mode.
+        </div>
+      )}
       
       {/* Success Modal Overlay */}
       {success && (
@@ -152,6 +182,8 @@ const InspectionBook = () => {
                 setSuccess(false);
                 if (id) {
                   navigate('/inspection/list');
+                } else {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors"
@@ -169,6 +201,7 @@ const InspectionBook = () => {
       )}
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <fieldset disabled={isReadOnly} className="space-y-6">
         
         {/* Section 1: Application Info */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -330,17 +363,20 @@ const InspectionBook = () => {
             <textarea {...register('remark')} rows={3} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500"></textarea>
           </div>
         </div>
+        </fieldset>
 
-        <div className="flex justify-end pt-4 pb-12">
-          <button 
-            type="submit" 
-            disabled={saving}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-8 rounded-lg flex items-center transition-colors disabled:opacity-50"
-          >
-            <Save className="w-5 h-5 mr-2" />
-            {saving ? 'Submitting...' : 'Submit Inspection'}
-          </button>
-        </div>
+        {!isReadOnly && (
+          <div className="flex justify-end pt-4 pb-12 print:hidden">
+            <button 
+              type="submit" 
+              disabled={saving}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-8 rounded-lg flex items-center transition-colors disabled:opacity-50"
+            >
+              <Save className="w-5 h-5 mr-2" />
+              {saving ? 'Submitting...' : 'Submit Inspection'}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, FileEdit, ClipboardList, Settings, Menu, X, LogOut } from 'lucide-react';
+import { Home, FileEdit, ClipboardList, Settings, Menu, X, LogOut, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import logo from '../assets/logo.png';
@@ -20,6 +20,7 @@ const InspectionLayout = () => {
     { name: 'Dashboard', href: '/inspection/dashboard', icon: Home, exact: true },
     { name: 'Inspection Book', href: '/inspection/book', icon: FileEdit },
     { name: 'Inspection List', href: '/inspection/list', icon: ClipboardList },
+    { name: 'Submission', href: '/inspection/submit', icon: Send },
     { name: 'Settings', href: '/inspection/settings', icon: Settings, exact: true },
   ];
 
