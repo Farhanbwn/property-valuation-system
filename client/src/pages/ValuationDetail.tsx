@@ -28,7 +28,7 @@ const ValuationDetail = () => {
   if (loading) return <div className="p-10 text-center">Loading...</div>;
   if (error || !record) return <div className="p-10 text-center text-red-500">{error}</div>;
 
-  const formatCurrency = (val: number) => 
+  const formatCurrency = (val: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
 
   return (
@@ -37,7 +37,7 @@ const ValuationDetail = () => {
         <Link to="/valuation-history" className="flex items-center text-slate-500 hover:text-slate-900 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to History
         </Link>
-        <button 
+        <button
           onClick={() => window.print()}
           className="flex items-center bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
         >
@@ -47,12 +47,12 @@ const ValuationDetail = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none overflow-hidden">
         {/* Print Header */}
-        <div className="hidden print:flex flex-col items-center justify-center text-center pb-6 mb-6 border-b-2 border-black">
-          <img src={logoPrint} alt="Burdwan Property & Land Valuation" className="w-32 h-auto mb-4 object-contain" />
-          <h1 className="text-2xl font-bold uppercase tracking-tight text-black mb-2">
+        <div className="hidden print:flex flex-col items-center justify-center text-center pb-4 mb-4 border-b-2 border-black">
+          <img src={logoPrint} alt="Burdwan Property & Land Valuation" className="w-20 h-auto mb-2 object-contain" />
+          <h1 className="text-xl font-bold uppercase tracking-tight text-black mb-1">
             BURDWAN PROPERTY & LAND VALUATION
           </h1>
-          <p className="text-sm font-semibold text-slate-800">
+          <p className="text-xs font-semibold text-slate-800">
             {record.valuationType === 'LAND' ? 'STANDALONE LAND VALUATION REPORT' : 'PROPERTY VALUATION REPORT'}
           </p>
         </div>
@@ -119,8 +119,8 @@ const ValuationDetail = () => {
                   <div className="space-y-2 print:space-y-1">
                     <p><span className="text-slate-500 block text-xs">Land Type</span> <span className="font-medium text-slate-900">{
                       record.inputs.landType === 'VACANT_LAND' || record.inputs.landType === 'NORMAL' ? 'Vacant Land'
-                      : record.inputs.landType === 'POND' ? 'Pond'
-                      : record.inputs.landType
+                        : record.inputs.landType === 'POND' ? 'Pond'
+                          : record.inputs.landType
                     }</span></p>
                   </div>
                 </div>
@@ -142,12 +142,12 @@ const ValuationDetail = () => {
           </div>
         </div>
 
-        <div className="p-8 print:p-4 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800 mb-6 print:mb-4 flex items-center uppercase tracking-wider">
+        <div className="p-8 print:p-2 bg-slate-50/50 print:bg-white">
+          <h2 className="text-lg font-bold text-slate-800 mb-6 print:mb-2 flex items-center uppercase tracking-wider">
             <Calculator className="w-5 h-5 mr-2 text-primary" /> Calculation Summary
           </h2>
 
-          <div className="space-y-6 print:space-y-4">
+          <div className="space-y-6 print:space-y-2">
             {/* Score & Building */}
             {record.valuationType === 'LAND' ? (
               <div className="grid grid-cols-1 gap-8 print:gap-4">
@@ -198,11 +198,21 @@ const ValuationDetail = () => {
               </div>
             )}
 
-            {/* Final Results */}
-            <div className="bg-slate-900 text-white p-6 print:p-4 rounded-xl shadow-inner mt-8 print:mt-4 print:bg-slate-100 print:text-slate-900 print:border print:border-slate-300">
-              <div className="flex flex-col md:flex-row md:items-end justify-between">
+            {/* Effective Period */}
+            {record.property.effectFrom && (
+              <div className="bg-emerald-50 text-emerald-900 p-4 print:p-2 rounded-xl border border-emerald-200 mt-8 print:mt-2 flex items-center justify-between">
                 <div>
-                  <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Final Effective Valuation</h3>
+                  <h3 className="text-emerald-700 text-xs font-semibold uppercase tracking-wider mb-1">Effective Period</h3>
+                  <div className="text-lg font-bold">{record.property.effectFrom} <span className="text-emerald-700 font-medium">({record.property.effectYear || 'N/A'})</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Final Results */}
+            <div className="bg-slate-900 text-white p-6 print:p-3 rounded-xl shadow-inner mt-4 print:mt-2 print:bg-slate-100 print:text-slate-900 print:border print:border-slate-300">
+              <div className="flex justify-between items-end">
+                <div>
+                  <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1 print:mb-0">Final Effective Valuation</h3>
                   <div className="text-4xl font-bold">{formatCurrency(record.calculationBreakdown.effectiveValuation)}</div>
                   {record.calculationBreakdown.minimumApplied && (
                     <span className="inline-block mt-2 text-xs bg-accent text-slate-900 px-2 py-1 rounded font-medium">
@@ -210,7 +220,7 @@ const ValuationDetail = () => {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="mt-6 md:mt-0 space-y-3 md:text-right">
                   <div>
                     <span className="text-slate-400 text-sm mr-4">Quarter Tax / Fee:</span>
@@ -227,7 +237,7 @@ const ValuationDetail = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Print-only footer */}
         <div className="hidden print-only p-8 print:p-4 text-center text-xs text-slate-400 border-t border-slate-200">
           Generated by Property Score & Valuation System • {new Date().toLocaleString()}

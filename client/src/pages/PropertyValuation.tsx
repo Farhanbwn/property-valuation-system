@@ -21,7 +21,9 @@ const formSchema = z.object({
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
     khatianNo: z.string().optional(),
-    lrPlot: z.string().optional()
+    lrPlot: z.string().optional(),
+    effectFrom: z.enum(['Q1', 'Q2', 'Q3', 'Q4'], { required_error: 'Required' }),
+    effectYear: z.string().min(1, 'Required')
   }),
   coverAreaSqFt: z.coerce.number().min(0, 'Must be positive'),
   zoneScoreCode: z.string().min(1, 'Required'),
@@ -112,6 +114,8 @@ const PropertyValuation = () => {
               jlNo: d.jlNo || '',
               khatianNo: d.khatianNo || '',
               lrPlot: d.lrPlot || '',
+              effectFrom: d.effectFrom || '',
+              effectYear: d.effectYear || '',
               notes: d.remark ? `Imported from Inspection Book. Remark: ${d.remark}` : 'Imported from Inspection Book.'
             },
             coverAreaSqFt: d.coverAreaSqFt || 0,
@@ -234,6 +238,7 @@ const PropertyValuation = () => {
                   ))}
                 </select>
               </div>
+
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Holding Number</label>
@@ -373,6 +378,29 @@ const PropertyValuation = () => {
                 <span className="text-lg font-bold text-slate-800">{liveResult.land.totalSqFt.toLocaleString()} sq ft</span>
               </div>
             )}
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-lg font-semibold mb-4 text-slate-800">5. Effective Period</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">With Effect from <span className="text-red-500">*</span></label>
+                <select {...register('propertyDetails.effectFrom')} className={`w-full rounded-md shadow-sm p-2 border ${errors.propertyDetails?.effectFrom ? 'border-red-300' : 'border-slate-300'} focus:border-blue-500 focus:ring-blue-500 bg-white`}>
+                  <option value="">Select Quarter...</option>
+                  <option value="Q1">Q1</option>
+                  <option value="Q2">Q2</option>
+                  <option value="Q3">Q3</option>
+                  <option value="Q4">Q4</option>
+                </select>
+                {errors.propertyDetails?.effectFrom && <p className="mt-1 text-xs text-red-500">{errors.propertyDetails.effectFrom.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Year <span className="text-red-500">*</span></label>
+                <input type="text" {...register('propertyDetails.effectYear')} placeholder="e.g. 2025-26" className={`w-full rounded-md shadow-sm p-2 border ${errors.propertyDetails?.effectYear ? 'border-red-300' : 'border-slate-300'} focus:border-blue-500 focus:ring-blue-500`} />
+                {errors.propertyDetails?.effectYear && <p className="mt-1 text-xs text-red-500">{errors.propertyDetails.effectYear.message}</p>}
+              </div>
+            </div>
           </div>
         </form>
       </div>
