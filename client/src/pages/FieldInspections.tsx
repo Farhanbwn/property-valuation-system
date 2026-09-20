@@ -36,8 +36,9 @@ const FieldInspections = () => {
   }, []);
 
   const handleCopyToValuation = (inspection: any) => {
-    // We can pass the inspection data to the property-valuation page via state
-    navigate('/property-valuation', { state: { importedInspection: inspection } });
+    const isLand = ['VACANT_LAND', 'POND'].includes(inspection.natureOfUseCode);
+    const route = isLand ? '/land-valuation' : '/property-valuation';
+    navigate(route, { state: { importedInspection: inspection } });
   };
 
   return (

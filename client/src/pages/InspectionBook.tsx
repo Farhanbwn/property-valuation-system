@@ -62,6 +62,8 @@ const InspectionBook = () => {
   });
 
   const selectedWard = watch('ward');
+  const natureOfUseCode = watch('natureOfUseCode');
+  const isVacantOrPond = ['VACANT_LAND', 'POND'].includes(natureOfUseCode || '');
 
   useEffect(() => {
     valuationService.getRules()
@@ -98,6 +100,15 @@ const InspectionBook = () => {
     // we just skip this for now. `reset(d)` correctly sets both ward and location.
     // If user changes ward, they will have to select location again which is fine.
   }, [selectedWard, setValue]);
+
+  useEffect(() => {
+    if (isVacantOrPond) {
+      setValue('coverAreaSqFt', 0);
+      setValue('buildingAgeYears', 0);
+      setValue('constructionScoreCode', '');
+      setValue('noOfFloor', '');
+    }
+  }, [isVacantOrPond, setValue]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -183,7 +194,7 @@ const InspectionBook = () => {
                 if (id) {
                   navigate('/inspection/list');
                 } else {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.location.reload();
                 }
               }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors"
@@ -287,17 +298,6 @@ const InspectionBook = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h2 className="text-lg font-semibold mb-4 text-slate-800">4. Property Specifics</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Covered Area (Sq Ft) <span className="text-red-500">*</span></label>
-              <input type="number" min="0" {...register('coverAreaSqFt')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
-              {errors.coverAreaSqFt && <p className="text-red-500 text-xs mt-1">{errors.coverAreaSqFt.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Building Age (Years) <span className="text-red-500">*</span></label>
-              <input type="number" min="0" {...register('buildingAgeYears')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
-              {errors.buildingAgeYears && <p className="text-red-500 text-xs mt-1">{errors.buildingAgeYears.message}</p>}
-            </div>
-            
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">Nature of Use (Usage / Commercial / Land Type)</label>
               <select {...register('natureOfUseCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
@@ -310,25 +310,40 @@ const InspectionBook = () => {
               </select>
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Construction Type</label>
-              <select {...register('constructionScoreCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
-                <option value="">Select Construction Type...</option>
-                {rules?.scoreLookup.filter((s:any) => s.type === 'construction').map((s:any) => (
-                  <option key={s.code} value={s.code}>{s.code} - {s.description}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">No of Floors</label>
-              <select {...register('noOfFloor')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
-                <option value="">Select Floors...</option>
-                {ROMAN_NUMERALS.map(num => (
-                  <option key={num} value={num}>{num}</option>
-                ))}
-              </select>
-            </div>
+            {!isVacantOrPond && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Covered Area (Sq Ft) <span className="text-red-500">*</span></label>
+                  <input type="number" min="0" {...register('coverAreaSqFt')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
+                  {errors.coverAreaSqFt && <p className="text-red-500 text-xs mt-1">{errors.coverAreaSqFt.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Building Age (Years) <span className="text-red-500">*</span></label>
+                  <input type="number" min="0" {...register('buildingAgeYears')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
+                  {errors.buildingAgeYears && <p className="text-red-500 text-xs mt-1">{errors.buildingAgeYears.message}</p>}
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Construction Type</label>
+                  <select {...register('constructionScoreCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
+                    <option value="">Select Construction Type...</option>
+                    {rules?.scoreLookup.filter((s:any) => s.type === 'construction').map((s:any) => (
+                      <option key={s.code} value={s.code}>{s.code} - {s.description}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">No of Floors</label>
+                  <select {...register('noOfFloor')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
+                    <option value="">Select Floors...</option>
+                    {ROMAN_NUMERALS.map(num => (
+                      <option key={num} value={num}>{num}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
           </div>
         </div>
 

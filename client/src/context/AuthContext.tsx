@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import axios from 'axios';
 
@@ -21,21 +21,17 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedToken = sessionStorage.getItem('token');
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = sessionStorage.getItem('user');
-
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      
-      // Setup Axios interceptor here or in a separate API config
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(() => {
+    const storedToken = sessionStorage.getItem('token');
+    if (storedToken) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
-  }, []);
+    return storedToken;
+  });
 
   const login = (newToken: string, newUser: User) => {
     sessionStorage.setItem('token', newToken);
