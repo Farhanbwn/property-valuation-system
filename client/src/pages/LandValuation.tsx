@@ -3,12 +3,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
+import { BURDWAN_MOUZA_LIST } from '../data/mouzaData';
+import { Controller } from 'react-hook-form';
+import { CustomSelect } from '../components/ui/CustomSelect';
 import { Map, Calculator, Save } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 const formSchema = z.object({
   propertyDetails: z.object({
-    ownerName: z.string().optional(),
+    ownerName: z.string().min(1, 'Required'),
     district: z.string().optional(),
     ulbName: z.string().optional(),
     ward: z.coerce.number().optional(),
@@ -19,6 +22,7 @@ const formSchema = z.object({
     applicationNo: z.string().optional(),
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
+    mouza: z.string().optional(),
     khatianNo: z.string().optional(),
     lrPlot: z.string().optional(),
     effectFrom: z.enum(['Q1', 'Q2', 'Q3', 'Q4'], { required_error: 'Required', invalid_type_error: 'Required' }),
@@ -48,7 +52,7 @@ const LandValuation = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, reset, control, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       propertyDetails: {
@@ -110,6 +114,7 @@ const LandValuation = () => {
               location: d.location || '',
               holdingNumber: d.holdingNumber || '',
               jlNo: d.jlNo || '',
+              mouza: d.mouza || '',
               khatianNo: d.khatianNo || '',
               lrPlot: d.lrPlot || '',
               effectFrom: (d.effectFrom as any) || 'Q1',
@@ -186,9 +191,10 @@ const LandValuation = () => {
             <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Property Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name <span className="text-red-500">*</span></label>
                 <input type="text" {...register('propertyDetails.ownerName')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+                {errors.propertyDetails?.ownerName && <p className="text-red-500 text-xs mt-1">{errors.propertyDetails.ownerName.message}</p>}
               </div>
 
               <div>
@@ -203,22 +209,41 @@ const LandValuation = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Ward</label>
-                <select {...register('propertyDetails.ward')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500 bg-white">
-                  <option value="">Select Ward...</option>
-                  {rules?.locationData?.wards.map((w: any) => (
-                    <option key={w.ward} value={w.ward}>Ward {w.ward}</option>
-                  ))}
-                </select>
+                <Controller
+                  name="propertyDetails.ward"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Ward..."
+                      options={rules?.locationData?.wards.map((w: any) => ({
+                        label: `Ward ${w.ward}`,
+                        value: String(w.ward)
+                      })) || []}
+                    />
+                  )}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
-                <select {...register('propertyDetails.location')} disabled={!selectedWard} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500 bg-white disabled:bg-slate-100">
-                  <option value="">Select Location...</option>
-                  {selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
+                <Controller
+                  name="propertyDetails.location"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!selectedWard}
+                      placeholder="Select Location..."
+                      options={(selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => ({
+                        label: loc,
+                        value: loc
+                      }))) || []}
+                    />
+                  )}
+                />
               </div>
 
 
@@ -246,7 +271,42 @@ const LandValuation = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">J.L No</label>
-                <input type="text" {...register('propertyDetails.jlNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+                <Controller
+                  name="propertyDetails.jlNo"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        const match = BURDWAN_MOUZA_LIST.find(m => m.jlNo === val);
+                        if (match) setValue('propertyDetails.mouza', match.mouza);
+                      }}
+                      placeholder="Select J.L No..."
+                      options={BURDWAN_MOUZA_LIST.map(item => ({ label: item.jlNo, value: item.jlNo }))}
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Mouza</label>
+                <Controller
+                  name="propertyDetails.mouza"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        const match = BURDWAN_MOUZA_LIST.find(m => m.mouza === val);
+                        if (match) setValue('propertyDetails.jlNo', match.jlNo);
+                      }}
+                      placeholder="Select Mouza..."
+                      options={BURDWAN_MOUZA_LIST.map(item => ({ label: item.mouza, value: item.mouza }))}
+                    />
+                  )}
+                />
               </div>
 
               <div>
@@ -254,7 +314,7 @@ const LandValuation = () => {
                 <input type="text" {...register('propertyDetails.khatianNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">L.R. Plot</label>
                 <input type="text" {...register('propertyDetails.lrPlot')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
@@ -267,22 +327,41 @@ const LandValuation = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Zone *</label>
-                <select {...register('zone')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-primary focus:ring-primary">
-                  <option value="">Select Zone...</option>
-                  {rules.landZoneRatesPerKhatha.map((z: any) => (
-                    <option key={z.code} value={z.code}>{z.code} - {z.description || 'Zone'} - {formatCurrency(z.value)}/Khatha</option>
-                  ))}
-                </select>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Zone <span className="text-red-500">*</span></label>
+                <Controller
+                  name="zone"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Zone..."
+                      options={rules.landZoneRatesPerKhatha.map((z: any) => ({
+                        label: `${z.code} - ${z.description || 'Zone'} - ${formatCurrency(z.value)}/Khatha`,
+                        value: z.code
+                      }))}
+                    />
+                  )}
+                />
                 {errors.zone && <p className="text-red-500 text-xs mt-1">{errors.zone.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Land Type *</label>
-                <select {...register('landType')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-primary focus:ring-primary">
-                  <option value="VACANT_LAND">Vacant Land</option>
-                  <option value="POND">Pond (50% Valuation)</option>
-                </select>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Land Type <span className="text-red-500">*</span></label>
+                <Controller
+                  name="landType"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={[
+                        { label: 'Vacant Land', value: 'VACANT_LAND' },
+                        { label: 'Pond (50% Valuation)', value: 'POND' }
+                      ]}
+                    />
+                  )}
+                />
               </div>
 
             </div>
@@ -321,13 +400,23 @@ const LandValuation = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">With Effect from <span className="text-red-500">*</span></label>
-                <select {...register('propertyDetails.effectFrom')} className={`w-full rounded-md shadow-sm p-2 border ${errors.propertyDetails?.effectFrom ? 'border-red-300' : 'border-slate-300'} focus:border-blue-500 focus:ring-blue-500 bg-white`}>
-                  <option value="">Select Quarter...</option>
-                  <option value="Q1">Q1</option>
-                  <option value="Q2">Q2</option>
-                  <option value="Q3">Q3</option>
-                  <option value="Q4">Q4</option>
-                </select>
+                <Controller
+                  name="propertyDetails.effectFrom"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Quarter..."
+                      options={[
+                        { label: 'Q1', value: 'Q1' },
+                        { label: 'Q2', value: 'Q2' },
+                        { label: 'Q3', value: 'Q3' },
+                        { label: 'Q4', value: 'Q4' }
+                      ]}
+                    />
+                  )}
+                />
                 {errors.propertyDetails?.effectFrom && <p className="mt-1 text-xs text-red-500">{errors.propertyDetails.effectFrom.message}</p>}
               </div>
 

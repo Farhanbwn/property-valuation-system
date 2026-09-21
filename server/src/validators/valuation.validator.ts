@@ -17,7 +17,7 @@ export const propertyValuationInputSchema = z.object({
   landArea: landAreaSchema,
   propertyDetails: z.object({
     holdingNumber: z.string().optional(),
-    ownerName: z.string().optional(),
+    ownerName: z.string().min(1, "Owner Name is required"),
     address: z.string().optional(),
     district: z.string().optional(),
     ulbName: z.string().optional(),
@@ -28,6 +28,7 @@ export const propertyValuationInputSchema = z.object({
     applicationNo: z.string().optional(),
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
+    mouza: z.string().optional(),
     khatianNo: z.string().optional(),
     lrPlot: z.string().optional(),
     effectFrom: z.enum(['', 'Q1', 'Q2', 'Q3', 'Q4']).optional(),
@@ -41,7 +42,7 @@ export const standaloneLandValuationInputSchema = z.object({
   landType: z.enum(['VACANT_LAND', 'POND']).default('VACANT_LAND'),
   propertyDetails: z.object({
     holdingNumber: z.string().optional(),
-    ownerName: z.string().optional(),
+    ownerName: z.string().min(1, "Owner Name is required"),
     address: z.string().optional(),
     district: z.string().optional(),
     ulbName: z.string().optional(),
@@ -52,6 +53,7 @@ export const standaloneLandValuationInputSchema = z.object({
     applicationNo: z.string().optional(),
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
+    mouza: z.string().optional(),
     khatianNo: z.string().optional(),
     lrPlot: z.string().optional(),
     effectFrom: z.enum(['', 'Q1', 'Q2', 'Q3', 'Q4']).optional(),

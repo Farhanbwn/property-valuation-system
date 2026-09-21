@@ -3,12 +3,15 @@ import { useForm as useRHForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { valuationService } from '../services/api';
+import { BURDWAN_MOUZA_LIST } from '../data/mouzaData';
+import { Controller } from 'react-hook-form';
+import { CustomSelect } from '../components/ui/CustomSelect';
 import { Calculator, Save, AlertCircle } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 const formSchema = z.object({
   propertyDetails: z.object({
-    ownerName: z.string().optional(),
+    ownerName: z.string().min(1, 'Required'),
     district: z.string().optional(),
     ulbName: z.string().optional(),
     ward: z.coerce.number().optional(),
@@ -20,6 +23,7 @@ const formSchema = z.object({
     applicationNo: z.string().optional(),
     applicationDate: z.string().optional(),
     jlNo: z.string().optional(),
+    mouza: z.string().optional(),
     khatianNo: z.string().optional(),
     lrPlot: z.string().optional(),
     effectFrom: z.enum(['Q1', 'Q2', 'Q3', 'Q4'], { required_error: 'Required', invalid_type_error: 'Required' }),
@@ -54,7 +58,7 @@ const PropertyValuation = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useRHForm<FormData>({
+  const { register, handleSubmit, watch, setValue, reset, control, formState: { errors } } = useRHForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       propertyDetails: {
@@ -112,6 +116,7 @@ const PropertyValuation = () => {
               location: d.location || '',
               holdingNumber: d.holdingNumber || '',
               jlNo: d.jlNo || '',
+              mouza: d.mouza || '',
               khatianNo: d.khatianNo || '',
               lrPlot: d.lrPlot || '',
               effectFrom: d.effectFrom || '',
@@ -204,9 +209,10 @@ const PropertyValuation = () => {
             <h2 className="text-lg font-semibold mb-4 text-slate-800">1. Property Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name <span className="text-red-500">*</span></label>
                 <input type="text" {...register('propertyDetails.ownerName')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+                {errors.propertyDetails?.ownerName && <p className="text-red-500 text-xs mt-1">{errors.propertyDetails.ownerName.message}</p>}
               </div>
 
               <div>
@@ -221,22 +227,41 @@ const PropertyValuation = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Ward</label>
-                <select {...register('propertyDetails.ward')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border bg-white">
-                  <option value="">Select Ward...</option>
-                  {rules?.locationData?.wards.map((w: any) => (
-                    <option key={w.ward} value={w.ward}>Ward {w.ward}</option>
-                  ))}
-                </select>
+                <Controller
+                  name="propertyDetails.ward"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Ward..."
+                      options={rules?.locationData?.wards.map((w: any) => ({
+                        label: `Ward ${w.ward}`,
+                        value: String(w.ward)
+                      })) || []}
+                    />
+                  )}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
-                <select {...register('propertyDetails.location')} disabled={!selectedWard} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border bg-white disabled:bg-slate-100">
-                  <option value="">Select Location...</option>
-                  {selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
+                <Controller
+                  name="propertyDetails.location"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!selectedWard}
+                      placeholder="Select Location..."
+                      options={(selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => ({
+                        label: loc,
+                        value: loc
+                      }))) || []}
+                    />
+                  )}
+                />
               </div>
 
 
@@ -264,7 +289,42 @@ const PropertyValuation = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">J.L No</label>
-                <input type="text" {...register('propertyDetails.jlNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
+                <Controller
+                  name="propertyDetails.jlNo"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        const match = BURDWAN_MOUZA_LIST.find(m => m.jlNo === val);
+                        if (match) setValue('propertyDetails.mouza', match.mouza);
+                      }}
+                      placeholder="Select J.L No..."
+                      options={BURDWAN_MOUZA_LIST.map(item => ({ label: item.jlNo, value: item.jlNo }))}
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Mouza</label>
+                <Controller
+                  name="propertyDetails.mouza"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        const match = BURDWAN_MOUZA_LIST.find(m => m.mouza === val);
+                        if (match) setValue('propertyDetails.jlNo', match.jlNo);
+                      }}
+                      placeholder="Select Mouza..."
+                      options={BURDWAN_MOUZA_LIST.map(item => ({ label: item.mouza, value: item.mouza }))}
+                    />
+                  )}
+                />
               </div>
 
               <div>
@@ -272,7 +332,7 @@ const PropertyValuation = () => {
                 <input type="text" {...register('propertyDetails.khatianNo')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">L.R. Plot</label>
                 <input type="text" {...register('propertyDetails.lrPlot')} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary p-2 border" />
               </div>
@@ -285,68 +345,95 @@ const PropertyValuation = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Covered Area (Sq Ft) *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Covered Area (Sq Ft) <span className="text-red-500">*</span></label>
                 <input type="number" min="0" {...register('coverAreaSqFt')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border" />
                 {errors.coverAreaSqFt && <p className="text-red-500 text-xs mt-1">{errors.coverAreaSqFt.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Building Age (Years) *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Building Age (Years) <span className="text-red-500">*</span></label>
                 <input type="number" min="0" {...register('buildingAgeYears')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border" />
                 {errors.buildingAgeYears && <p className="text-red-500 text-xs mt-1">{errors.buildingAgeYears.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
-                  Zone *
+                <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between items-center">
+                  <span>Zone <span className="text-red-500">*</span></span>
                   {watchAllFields.zoneScoreCode && (
                     <span className="text-primary text-xs bg-primary/10 px-2 py-0.5 rounded">
                       Waitage: Rs. {rules.scoreLookup.find((s:any) => s.code === watchAllFields.zoneScoreCode)?.value.toFixed(2)}
                     </span>
                   )}
                 </label>
-                <select {...register('zoneScoreCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border">
-                  <option value="">Select Zone...</option>
-                  {rules.scoreLookup.filter((s:any) => s.type === 'zone').map((s:any) => (
-                    <option key={s.code} value={s.code}>{s.code} - {s.description || 'Zone'} (Rs. {s.value.toFixed(2)})</option>
-                  ))}
-                </select>
+                <Controller
+                  name="zoneScoreCode"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Zone..."
+                      options={rules.scoreLookup.filter((s:any) => s.type === 'zone').map((s:any) => ({
+                        label: `${s.code} - ${s.description || 'Zone'} (Rs. ${s.value.toFixed(2)})`,
+                        value: s.code
+                      }))}
+                    />
+                  )}
+                />
                 {errors.zoneScoreCode && <p className="text-red-500 text-xs mt-1">{errors.zoneScoreCode.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
-                  Usage / Commercial Category *
+                <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between items-center">
+                  <span>Usage / Commercial Category <span className="text-red-500">*</span></span>
                   {watchAllFields.useOrCommercialScoreCode && (
                     <span className="text-primary text-xs bg-primary/10 px-2 py-0.5 rounded">
                       Waitage: Rs. {rules.scoreLookup.find((s:any) => s.code === watchAllFields.useOrCommercialScoreCode)?.value.toFixed(2)}
                     </span>
                   )}
                 </label>
-                <select {...register('useOrCommercialScoreCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border">
-                  <option value="">Select Usage...</option>
-                  {rules.scoreLookup.filter((s:any) => ['usage', 'commercial', 'combined'].includes(s.type)).map((s:any) => (
-                    <option key={s.code} value={s.code}>{s.code} - {s.description || 'Usage'} (Rs. {s.value.toFixed(2)})</option>
-                  ))}
-                </select>
+                <Controller
+                  name="useOrCommercialScoreCode"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Usage..."
+                      options={rules.scoreLookup.filter((s:any) => ['usage', 'commercial', 'combined'].includes(s.type)).map((s:any) => ({
+                        label: `${s.code} - ${s.description || 'Usage'} (Rs. ${s.value.toFixed(2)})`,
+                        value: s.code
+                      }))}
+                    />
+                  )}
+                />
                 {errors.useOrCommercialScoreCode && <p className="text-red-500 text-xs mt-1">{errors.useOrCommercialScoreCode.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
-                  Construction Type *
+                <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between items-center">
+                  <span>Construction Type <span className="text-red-500">*</span></span>
                   {watchAllFields.constructionScoreCode && (
                     <span className="text-primary text-xs bg-primary/10 px-2 py-0.5 rounded">
                       Waitage: Rs. {rules.scoreLookup.find((s:any) => s.code === watchAllFields.constructionScoreCode)?.value.toFixed(2)}
                     </span>
                   )}
                 </label>
-                <select {...register('constructionScoreCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border">
-                  <option value="">Select Construction...</option>
-                  {rules.scoreLookup.filter((s:any) => s.type === 'construction').map((s:any) => (
-                    <option key={s.code} value={s.code}>{s.code} - {s.description || 'Construction'} (Rs. {s.value.toFixed(2)})</option>
-                  ))}
-                </select>
+                <Controller
+                  name="constructionScoreCode"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Construction..."
+                      options={rules.scoreLookup.filter((s:any) => s.type === 'construction').map((s:any) => ({
+                        label: `${s.code} - ${s.description || 'Construction'} (Rs. ${s.value.toFixed(2)})`,
+                        value: s.code
+                      }))}
+                    />
+                  )}
+                />
                 {errors.constructionScoreCode && <p className="text-red-500 text-xs mt-1">{errors.constructionScoreCode.message}</p>}
               </div>
             </div>
@@ -385,13 +472,23 @@ const PropertyValuation = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">With Effect from <span className="text-red-500">*</span></label>
-                <select {...register('propertyDetails.effectFrom')} className={`w-full rounded-md shadow-sm p-2 border ${errors.propertyDetails?.effectFrom ? 'border-red-300' : 'border-slate-300'} focus:border-blue-500 focus:ring-blue-500 bg-white`}>
-                  <option value="">Select Quarter...</option>
-                  <option value="Q1">Q1</option>
-                  <option value="Q2">Q2</option>
-                  <option value="Q3">Q3</option>
-                  <option value="Q4">Q4</option>
-                </select>
+                <Controller
+                  name="propertyDetails.effectFrom"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Quarter..."
+                      options={[
+                        { label: 'Q1', value: 'Q1' },
+                        { label: 'Q2', value: 'Q2' },
+                        { label: 'Q3', value: 'Q3' },
+                        { label: 'Q4', value: 'Q4' }
+                      ]}
+                    />
+                  )}
+                />
                 {errors.propertyDetails?.effectFrom && <p className="mt-1 text-xs text-red-500">{errors.propertyDetails.effectFrom.message}</p>}
               </div>
 

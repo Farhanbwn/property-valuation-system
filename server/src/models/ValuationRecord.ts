@@ -16,6 +16,7 @@ export interface IValuationRecord extends Document {
     applicationNo?: string;
     applicationDate?: Date;
     jlNo?: string;
+    mouza?: string;
     khatianNo?: string;
     lrPlot?: string;
     effectFrom?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
@@ -68,7 +69,7 @@ const ValuationRecordSchema = new Schema(
     valuationType: { type: String, enum: ['PROPERTY', 'LAND'], default: 'PROPERTY' },
     property: {
       holdingNumber: { type: String },
-      ownerName: { type: String },
+      ownerName: { type: String, required: true },
       address: { type: String },
       district: { type: String },
       ulbName: { type: String },
@@ -79,6 +80,7 @@ const ValuationRecordSchema = new Schema(
       applicationNo: { type: String },
       applicationDate: { type: Date },
       jlNo: { type: String },
+      mouza: { type: String },
       khatianNo: { type: String },
       lrPlot: { type: String },
       effectFrom: { type: String, enum: ['Q1', 'Q2', 'Q3', 'Q4'] },

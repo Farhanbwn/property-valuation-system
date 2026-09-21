@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { valuationService, inspectionService } from '../services/api';
+import { inspectionService, valuationService } from '../services/api';
+import { BURDWAN_MOUZA_LIST } from '../data/mouzaData';
 import { Save, CheckCircle2, Printer, ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Controller } from 'react-hook-form';
+import { CustomSelect } from '../components/ui/CustomSelect';
 
 const ROMAN_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV'];
 
 const formSchema = z.object({
   applicationNo: z.string().optional(),
   applicationDate: z.string().min(1, 'Required'),
-  ownerName: z.string().optional(),
+  ownerName: z.string().min(1, 'Required'),
   district: z.string().optional(),
   ulbName: z.string().optional(),
   ward: z.coerce.number().optional(),
@@ -49,7 +52,7 @@ const InspectionBook = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, reset, control, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       applicationDate: today,
@@ -235,8 +238,9 @@ const InspectionBook = () => {
           <h2 className="text-lg font-semibold mb-4 text-slate-800">2. Owner & Location</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Owner Name <span className="text-red-500">*</span></label>
               <input type="text" {...register('ownerName')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
+              {errors.ownerName && <p className="text-red-500 text-xs mt-1">{errors.ownerName.message}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">District</label>
@@ -248,21 +252,40 @@ const InspectionBook = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Ward</label>
-              <select {...register('ward')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
-                <option value="">Select Ward...</option>
-                {rules?.locationData?.wards.map((w: any) => (
-                  <option key={w.ward} value={w.ward}>Ward {w.ward}</option>
-                ))}
-              </select>
+              <Controller
+                name="ward"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Select Ward..."
+                    options={rules?.locationData?.wards.map((w: any) => ({
+                      label: `Ward ${w.ward}`,
+                      value: String(w.ward)
+                    })) || []}
+                  />
+                )}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
-              <select {...register('location')} disabled={!selectedWard} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white disabled:bg-slate-100">
-                <option value="">Select Location...</option>
-                {selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
+              <Controller
+                name="location"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={!selectedWard}
+                    placeholder="Select Location..."
+                    options={(selectedWard && rules?.locationData?.wards.find((w: any) => w.ward === Number(selectedWard))?.locations.map((loc: string) => ({
+                      label: loc,
+                      value: loc
+                    }))) || []}
+                  />
+                )}
+              />
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">Holding Number</label>
@@ -277,11 +300,41 @@ const InspectionBook = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">J.L No</label>
-              <input type="text" {...register('jlNo')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
+              <Controller
+                name="jlNo"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      const match = BURDWAN_MOUZA_LIST.find(m => m.jlNo === val);
+                      if (match) setValue('mouza', match.mouza);
+                    }}
+                    placeholder="Select J.L No..."
+                    options={BURDWAN_MOUZA_LIST.map(item => ({ label: item.jlNo, value: item.jlNo }))}
+                  />
+                )}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Mouza</label>
-              <input type="text" {...register('mouza')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500" />
+              <Controller
+                name="mouza"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      const match = BURDWAN_MOUZA_LIST.find(m => m.mouza === val);
+                      if (match) setValue('jlNo', match.jlNo);
+                    }}
+                    placeholder="Select Mouza..."
+                    options={BURDWAN_MOUZA_LIST.map(item => ({ label: item.mouza, value: item.mouza }))}
+                  />
+                )}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Khatian No</label>
@@ -300,14 +353,25 @@ const InspectionBook = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">Nature of Use (Usage / Commercial / Land Type)</label>
-              <select {...register('natureOfUseCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
-                <option value="">Select Nature of Use...</option>
-                {rules?.scoreLookup.filter((s:any) => ['usage', 'commercial', 'combined'].includes(s.type)).map((s:any) => (
-                  <option key={s.code} value={s.code}>{s.code} - {s.description}</option>
-                ))}
-                <option value="VACANT_LAND">VACANT_LAND - Vacant Land</option>
-                <option value="POND">POND - Pond (50% Valuation)</option>
-              </select>
+              <Controller
+                name="natureOfUseCode"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Select Nature of Use..."
+                    options={[
+                      ...(rules?.scoreLookup.filter((s:any) => ['usage', 'commercial', 'combined'].includes(s.type)).map((s:any) => ({
+                        label: `${s.code} - ${s.description}`,
+                        value: s.code
+                      })) || []),
+                      { label: 'VACANT_LAND - Vacant Land', value: 'VACANT_LAND' },
+                      { label: 'POND - Pond (50% Valuation)', value: 'POND' }
+                    ]}
+                  />
+                )}
+              />
             </div>
 
             {!isVacantOrPond && (
@@ -325,22 +389,37 @@ const InspectionBook = () => {
                 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-700 mb-1">Construction Type</label>
-                  <select {...register('constructionScoreCode')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
-                    <option value="">Select Construction Type...</option>
-                    {rules?.scoreLookup.filter((s:any) => s.type === 'construction').map((s:any) => (
-                      <option key={s.code} value={s.code}>{s.code} - {s.description}</option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="constructionScoreCode"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select Construction Type..."
+                        options={rules?.scoreLookup.filter((s:any) => s.type === 'construction').map((s:any) => ({
+                          label: `${s.code} - ${s.description}`,
+                          value: s.code
+                        })) || []}
+                      />
+                    )}
+                  />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">No of Floors</label>
-                  <select {...register('noOfFloor')} className="w-full rounded-md border-slate-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring-emerald-500 bg-white">
-                    <option value="">Select Floors...</option>
-                    {ROMAN_NUMERALS.map(num => (
-                      <option key={num} value={num}>{num}</option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="noOfFloor"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select Floors..."
+                        options={ROMAN_NUMERALS.map(num => ({ label: num, value: num }))}
+                      />
+                    )}
+                  />
                 </div>
               </>
             )}

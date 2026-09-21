@@ -38,7 +38,7 @@ const InspectionBookSchema: Schema = new Schema(
     parentUserId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     applicationNo: { type: String },
     applicationDate: { type: Date, required: true, default: Date.now },
-    ownerName: { type: String },
+    ownerName: { type: String, required: true },
     district: { type: String, default: 'Purba Bardhaman' },
     ulbName: { type: String, default: 'Burdwan Municipality' },
     ward: { type: Number },
