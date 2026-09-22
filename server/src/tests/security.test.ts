@@ -123,12 +123,23 @@ async function runSecurityTests() {
     assert.ok(config.clientUrl, 'Client URL must be defined for CORS origin matching');
   });
 
+  test('CORS origin validator allows production and preview Vercel domains and rejects unauthorized domains', async () => {
+    const { isOriginAllowed } = await import('../server');
+    assert.strictEqual(isOriginAllowed('https://bwnplvc.vercel.app'), true, 'Should allow https://bwnplvc.vercel.app');
+    assert.strictEqual(isOriginAllowed('https://bwnplvc.vercel.app/'), true, 'Should allow trailing slash on Vercel domain');
+    assert.strictEqual(isOriginAllowed('https://any-feature-branch.vercel.app'), true, 'Should allow Vercel preview domains');
+    assert.strictEqual(isOriginAllowed('http://localhost:5173'), true, 'Should allow local dev');
+    assert.strictEqual(isOriginAllowed('https://malicious-attacker-site.com'), false, 'Should reject unknown origins');
+  });
+
   console.log(`\n========================================`);
   console.log(`Security Test Summary: ${passed} Passed, ${failed} Failed`);
   console.log(`========================================\n`);
 
   if (failed > 0) {
     process.exit(1);
+  } else {
+    process.exit(0);
   }
 }
 

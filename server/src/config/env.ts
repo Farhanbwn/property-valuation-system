@@ -30,5 +30,5 @@ export const config = {
   mongoUri: process.env.MONGODB_URI || defaultDevDb,
   jwtSecret: resolvedSecret,
   isProduction,
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrl: process.env.CLIENT_URL || (isProduction ? 'https://bwnplvc.vercel.app' : 'http://localhost:5173'),
 };

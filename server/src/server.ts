@@ -11,31 +11,62 @@ import inspectionRoutes from './routes/inspection.routes';
 
 const app = express();
 
-// Security Headers via Helmet
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
-}));
+// Trust reverse proxy for deployment on platforms like Render / Vercel
+app.set('trust proxy', 1);
 
-// CORS Configuration - Restrict to authorized client origins
-const allowedOrigins = [
-  config.clientUrl,
+// CORS Configuration - Strictly driven by CLIENT_URL environment variable
+const envOrigins = (config.clientUrl || '')
+  .split(',')
+  .map(url => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+// Local development ports
+const localDevOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://client-henna-gamma-96.vercel.app'
-].filter(Boolean);
+  'http://localhost:4173',
+  'http://127.0.0.1:5173',
+];
 
-app.use(cors({
+const allowedOrigins = Array.from(new Set([...envOrigins, ...localDevOrigins]));
+
+export const isOriginAllowed = (origin?: string): boolean => {
+  if (!origin) return true; // allow curl, mobile, server-to-server requests
+  const normalizedOrigin = origin.replace(/\/$/, '');
+  
+  if (allowedOrigins.includes(normalizedOrigin)) {
+    return true;
+  }
+  
+  // Allow *.vercel.app origins for seamless Vercel production & preview deployments
+  if (/^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(normalizedOrigin)) {
+    return true;
+  }
+  
+  return false;
+};
+
+const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl) or matched origins
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Blocked by CORS policy: Origin not allowed'));
+      callback(null, false);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
+  optionsSuccessStatus: 200,
+};
+
+// 1. Apply CORS before other middleware so preflight OPTIONS requests are answered immediately
+app.use(cors(corsOptions));
+
+// 2. Security Headers via Helmet
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
 // Strict Body Parsers (Prevents memory exhaustion attacks via massive payloads)
