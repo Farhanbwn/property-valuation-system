@@ -6,6 +6,12 @@ import { User } from '../models/User';
 import { ValuationService } from '../services/valuation.service';
 import { propertyValuationInputSchema, standaloneLandValuationInputSchema } from '../validators/valuation.validator';
 import { z } from 'zod';
+import mongoose from 'mongoose';
+
+// Defense against ReDoS / Regex Injection
+export const escapeRegex = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
 
 export const getActiveRules = async (req: Request, res: Response) => {
   try {
@@ -118,7 +124,12 @@ export const updatePropertyValuation = async (req: AuthRequest, res: Response) =
       return res.status(404).json({ success: false, message: 'No active valuation rules found.' });
     }
 
-    const record = await ValuationRecord.findById(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid valuation ID format' });
+    }
+
+    const record = await ValuationRecord.findById(id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Valuation not found.' });
     }
@@ -178,8 +189,8 @@ export const updatePropertyValuation = async (req: AuthRequest, res: Response) =
 
 export const getValuationHistory = async (req: AuthRequest, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(Math.max(1, parseInt(req.query.limit as string) || 10), 1000);
     const skip = (page - 1) * limit;
 
     const query: any = {};
@@ -208,12 +219,13 @@ export const getValuationHistory = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    const search = req.query.search as string;
-    if (search) {
+    const rawSearch = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 100) : '';
+    if (rawSearch) {
+      const sanitized = escapeRegex(rawSearch);
       query.$or = [
-        { 'property.ownerName': { $regex: search, $options: 'i' } },
-        { 'property.applicationNo': { $regex: search, $options: 'i' } },
-        { 'property.holdingNumber': { $regex: search, $options: 'i' } },
+        { 'property.ownerName': { $regex: sanitized, $options: 'i' } },
+        { 'property.applicationNo': { $regex: sanitized, $options: 'i' } },
+        { 'property.holdingNumber': { $regex: sanitized, $options: 'i' } },
       ];
     }
 
@@ -270,7 +282,12 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
 
 export const getValuationById = async (req: AuthRequest, res: Response) => {
   try {
-    const record = await ValuationRecord.findById(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid valuation ID format' });
+    }
+
+    const record = await ValuationRecord.findById(id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Valuation not found.' });
     }
@@ -287,7 +304,12 @@ export const getValuationById = async (req: AuthRequest, res: Response) => {
 
 export const deleteValuation = async (req: AuthRequest, res: Response) => {
   try {
-    const record = await ValuationRecord.findById(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid valuation ID format' });
+    }
+
+    const record = await ValuationRecord.findById(id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Valuation not found.' });
     }
@@ -394,7 +416,12 @@ export const updateStandaloneLandValuation = async (req: AuthRequest, res: Respo
       return res.status(404).json({ success: false, message: 'No active valuation rules found.' });
     }
 
-    const record = await ValuationRecord.findById(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid valuation ID format' });
+    }
+
+    const record = await ValuationRecord.findById(id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Valuation not found.' });
     }

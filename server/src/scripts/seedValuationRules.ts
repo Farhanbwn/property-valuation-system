@@ -1,12 +1,10 @@
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import dotenv from 'dotenv';
+import { config } from '../config/env';
 import { ValuationRule } from '../models/ValuationRule';
 
-dotenv.config();
-
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/Property_Valuation';
+const MONGODB_URI = config.mongoUri;
 
 async function seed() {
   try {

@@ -1,69 +1,87 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { z } from 'zod';
 import { User } from '../models/User';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
+import { config } from '../config/env';
+import { registerSchema, loginSchema } from '../validators/auth.validator';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
-    
-    if (!name || !email || !password) {
-      res.status(400).json({ error: 'Name, email and password are required' });
-      return;
-    }
+    const validatedData = registerSchema.parse(req.body);
+    const { name, email, password } = validatedData;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      res.status(409).json({ error: 'User with this email already exists' });
+      res.status(409).json({ success: false, error: 'User with this email already exists' });
       return;
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
     const user = new User({
       name,
       email,
       passwordHash,
+      role: 'user', // strictly default to standard user on public registration
     });
     
     await user.save();
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, config.jwtSecret, { expiresIn: '7d' });
     
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.status(201).json({ 
+      success: true,
+      token, 
+      user: { id: user._id, name: user.name, email: user.email, role: user.role } 
+    });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ 
+        success: false, 
+        error: error.issues[0]?.message || 'Invalid input data',
+        details: error.issues 
+      });
+      return;
+    }
     console.error('Register error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      res.status(400).json({ error: 'Email and password are required' });
-      return;
-    }
+    const validatedData = loginSchema.parse(req.body);
+    const { email, password } = validatedData;
 
     const user = await User.findOne({ email });
     if (!user) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ success: false, error: 'Invalid credentials' });
       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ success: false, error: 'Invalid credentials' });
       return;
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, config.jwtSecret, { expiresIn: '7d' });
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.json({ 
+      success: true,
+      token, 
+      user: { id: user._id, name: user.name, email: user.email, role: user.role } 
+    });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ 
+        success: false, 
+        error: error.issues[0]?.message || 'Invalid input data' 
+      });
+      return;
+    }
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };

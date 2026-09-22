@@ -1,14 +1,19 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
+import { z } from 'zod';
 import { AuthRequest } from '../middleware/auth';
 import InspectionBook from '../models/InspectionBook';
 import { User } from '../models/User';
+import { createInspectionSchema, updateInspectionSchema, batchSubmitSchema } from '../validators/inspection.validator';
 
 export const createInspection = async (req: AuthRequest, res: Response) => {
   try {
     const inspectorId = req.user?.id;
-    if (!inspectorId) {
+    if (!inspectorId || !mongoose.Types.ObjectId.isValid(inspectorId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
+
+    const validatedData = createInspectionSchema.parse(req.body);
 
     // Get the parent user of the inspector
     const inspector = await User.findById(inspectorId);
@@ -17,10 +22,10 @@ export const createInspection = async (req: AuthRequest, res: Response) => {
     }
 
     const inspectionData = {
-      ...req.body,
-      inspectorId,
+      ...validatedData,
+      inspectorId: new mongoose.Types.ObjectId(inspectorId),
       parentUserId: inspector.parentUserId,
-      status: 'draft'
+      status: 'draft' as const
     };
 
     const newInspection = new InspectionBook(inspectionData);
@@ -28,6 +33,13 @@ export const createInspection = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json({ success: true, data: newInspection });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || 'Invalid inspection input',
+        errors: error.issues
+      });
+    }
     console.error('Error creating inspection:', error);
     res.status(500).json({ success: false, message: 'Server error while creating inspection' });
   }
@@ -36,7 +48,7 @@ export const createInspection = async (req: AuthRequest, res: Response) => {
 export const getMyInspections = async (req: AuthRequest, res: Response) => {
   try {
     const inspectorId = req.user?.id;
-    if (!inspectorId) {
+    if (!inspectorId || !mongoose.Types.ObjectId.isValid(inspectorId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
@@ -51,7 +63,7 @@ export const getMyInspections = async (req: AuthRequest, res: Response) => {
 export const getTeamInspections = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    if (!userId) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
@@ -71,11 +83,15 @@ export const getTeamInspections = async (req: AuthRequest, res: Response) => {
 
 export const getInspectionById = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const userId = req.user?.id;
     
-    if (!userId) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid inspection ID format' });
     }
 
     const inspection = await InspectionBook.findById(id);
@@ -97,12 +113,18 @@ export const getInspectionById = async (req: AuthRequest, res: Response) => {
 
 export const updateInspection = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const inspectorId = req.user?.id;
     
-    if (!inspectorId) {
+    if (!inspectorId || !mongoose.Types.ObjectId.isValid(inspectorId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid inspection ID format' });
+    }
+
+    const validatedData = updateInspectionSchema.parse(req.body);
 
     const inspection = await InspectionBook.findById(id);
     if (!inspection) {
@@ -118,14 +140,22 @@ export const updateInspection = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ success: false, message: 'Forbidden: Cannot edit an inspection that has already been submitted' });
     }
 
+    // Explicitly update only validated whitelisted fields (prevents mass-assignment of status, inspectorId, parentUserId)
     const updatedInspection = await InspectionBook.findByIdAndUpdate(
       id,
-      { $set: req.body },
-      { returnDocument: 'after', runValidators: true }
+      { $set: validatedData },
+      { new: true, runValidators: true }
     );
 
     res.json({ success: true, data: updatedInspection });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || 'Invalid inspection update',
+        errors: error.issues
+      });
+    }
     console.error('Error updating inspection:', error);
     res.status(500).json({ success: false, message: 'Server error while updating inspection' });
   }
@@ -133,11 +163,15 @@ export const updateInspection = async (req: AuthRequest, res: Response) => {
 
 export const deleteInspection = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const inspectorId = req.user?.id;
     
-    if (!inspectorId) {
+    if (!inspectorId || !mongoose.Types.ObjectId.isValid(inspectorId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid inspection ID format' });
     }
 
     const inspection = await InspectionBook.findById(id);
@@ -166,15 +200,13 @@ export const deleteInspection = async (req: AuthRequest, res: Response) => {
 export const submitInspectionsBatch = async (req: AuthRequest, res: Response) => {
   try {
     const inspectorId = req.user?.id;
-    const { inspectionIds } = req.body;
     
-    if (!inspectorId) {
+    if (!inspectorId || !mongoose.Types.ObjectId.isValid(inspectorId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
-    if (!Array.isArray(inspectionIds) || inspectionIds.length === 0) {
-      return res.status(400).json({ success: false, message: 'Please provide an array of inspection IDs' });
-    }
+    const validatedData = batchSubmitSchema.parse(req.body);
+    const { inspectionIds } = validatedData;
 
     // Update all provided inspections that belong to this inspector and are in 'draft' status
     const result = await InspectionBook.updateMany(
@@ -192,6 +224,13 @@ export const submitInspectionsBatch = async (req: AuthRequest, res: Response) =>
       modifiedCount: result.modifiedCount
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || 'Invalid batch submission data',
+        errors: error.issues
+      });
+    }
     console.error('Error batch submitting inspections:', error);
     res.status(500).json({ success: false, message: 'Server error while submitting inspections' });
   }

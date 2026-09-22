@@ -94,16 +94,13 @@ const ValuationDetail = () => {
               <h3 className="font-semibold text-slate-700 mb-3 print:mb-2 mt-6 flex items-center uppercase tracking-wider text-xs">
                 <MapIcon className="w-4 h-4 mr-2" /> Application & Land Records
               </h3>
-              <div className="grid grid-cols-2 gap-4 print:gap-2">
-                <div className="space-y-2 print:space-y-1">
-                  <p><span className="text-slate-500 block text-xs">Application No</span> <span className="text-slate-900">{record.property.applicationNo || 'N/A'}</span></p>
-                  <p><span className="text-slate-500 block text-xs">App Date</span> <span className="text-slate-900">{record.property.applicationDate ? new Date(record.property.applicationDate).toLocaleDateString('en-GB') : 'N/A'}</span></p>
-                  <p><span className="text-slate-500 block text-xs">L.R. Plot</span> <span className="text-slate-900">{record.property.lrPlot || 'N/A'}</span></p>
-                </div>
-                <div className="space-y-2 print:space-y-1">
-                  <p><span className="text-slate-500 block text-xs">J.L No</span> <span className="text-slate-900">{record.property.jlNo || 'N/A'}</span></p>
-                  <p><span className="text-slate-500 block text-xs">Khatian No</span> <span className="text-slate-900">{record.property.khatianNo || 'N/A'}</span></p>
-                </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 print:gap-x-2 print:gap-y-1">
+                <p><span className="text-slate-500 block text-xs">Application No</span> <span className="text-slate-900">{record.property.applicationNo || 'N/A'}</span></p>
+                <p><span className="text-slate-500 block text-xs">App Date</span> <span className="text-slate-900">{record.property.applicationDate ? new Date(record.property.applicationDate).toLocaleDateString('en-GB') : 'N/A'}</span></p>
+                <p><span className="text-slate-500 block text-xs">J.L No</span> <span className="text-slate-900">{record.property.jlNo || 'N/A'}</span></p>
+                <p><span className="text-slate-500 block text-xs">Mouza</span> <span className="text-slate-900">{record.property.mouza || 'N/A'}</span></p>
+                <p><span className="text-slate-500 block text-xs">L.R. Plot</span> <span className="text-slate-900">{record.property.lrPlot || 'N/A'}</span></p>
+                <p><span className="text-slate-500 block text-xs">Khatian No</span> <span className="text-slate-900">{record.property.khatianNo || 'N/A'}</span></p>
               </div>
             </div>
             <div>

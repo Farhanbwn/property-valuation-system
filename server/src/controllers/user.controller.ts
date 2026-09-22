@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
-import { User } from '../models/User';
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { z } from 'zod';
+import { User } from '../models/User';
 import { AuthRequest } from '../middleware/auth';
+import { createUserSchema, changePasswordSchema, resetPasswordSchema } from '../validators/user.validator';
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
@@ -19,7 +22,7 @@ export const getUsers = async (req: Request, res: Response) => {
 export const getMyInspectors = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    if (!userId) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
@@ -36,11 +39,8 @@ export const getMyInspectors = async (req: AuthRequest, res: Response) => {
 
 export const changePassword = async (req: AuthRequest, res: Response) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Current password and new password are required' });
-    }
+    const validatedData = changePasswordSchema.parse(req.body);
+    const { currentPassword, newPassword } = validatedData;
 
     const user = await User.findById(req.user?.id);
     if (!user) {
@@ -58,22 +58,25 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Error changing password:', error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        message: error.issues[0]?.message || 'Invalid password input' 
+      });
+    }
+    console.error('Password update failure:', error);
     res.status(500).json({ success: false, message: 'Server error while changing password' });
   }
 };
 
 export const createUser = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, email, password, role, parentUserId } = req.body;
-    
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ success: false, message: 'All fields are required' });
-    }
+    const validatedData = createUserSchema.parse(req.body);
+    const { name, email, password, role, parentUserId } = validatedData;
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'User already exists' });
+      return res.status(400).json({ success: false, message: 'User with this email already exists' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -81,13 +84,12 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
     const newUser = await User.create({
       name,
-      email: email.toLowerCase(),
+      email,
       passwordHash,
       role,
       parentUserId: role === 'inspection' ? parentUserId : undefined
     });
 
-    // Return the new user without passwordHash
     const userToReturn = {
       _id: newUser._id,
       name: newUser.name,
@@ -99,6 +101,12 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json({ success: true, data: userToReturn });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        message: error.issues[0]?.message || 'Invalid user data' 
+      });
+    }
     console.error('Error creating user:', error);
     res.status(500).json({ success: false, message: 'Server error while creating user' });
   }
@@ -106,7 +114,11 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.params.id;
+    const userId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
     
     // Prevent an admin from deleting themselves
     if (userId === req.user?.id) {
@@ -127,12 +139,14 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 
 export const resetUserPassword = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.params.id;
-    const { newPassword } = req.body;
+    const userId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
-    if (!newPassword) {
-      return res.status(400).json({ success: false, message: 'New password is required' });
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
     }
+
+    const validatedData = resetPasswordSchema.parse(req.body);
+    const { newPassword } = validatedData;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -145,7 +159,13 @@ export const resetUserPassword = async (req: AuthRequest, res: Response) => {
 
     res.json({ success: true, message: 'Password reset successfully' });
   } catch (error) {
-    console.error('Error resetting password:', error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        message: error.issues[0]?.message || 'Invalid password format' 
+      });
+    }
+    console.error('Password reset failure:', error);
     res.status(500).json({ success: false, message: 'Server error while resetting password' });
   }
 };

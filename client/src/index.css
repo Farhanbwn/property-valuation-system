@@ -7,12 +7,39 @@
   --color-accent: #f59e0b;
 }
 
+html {
+  /* Fluid responsive ratio:
+     Maintains the compact 90% view ratio proportionally across different laptop & desktop screen sizes:
+     - 1920px (Desktop 1080p @ 100%): ~14.4px (exact 90% ratio)
+     - 1536px (Laptop 1080p @ 125%): ~13.6px
+     - 1366px (Standard Laptop): ~13.2px
+     - 1280px (Compact display): ~12.8px
+     - 2560px (2K / 4K): capped at 15.2px
+  */
+  font-size: clamp(12.8px, 0.22vw + 10.2px, 15.2px);
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   @apply bg-slate-50 text-slate-900;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @media print {
+  html {
+    font-size: 100%;
+  }
   @page {
     margin: 1cm;
   }

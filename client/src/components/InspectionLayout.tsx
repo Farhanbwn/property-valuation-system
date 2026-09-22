@@ -97,7 +97,7 @@ const InspectionLayout = () => {
       <div className="flex-1 flex flex-col h-screen overflow-hidden print:h-auto print:overflow-visible relative">
         <Header />
         <main className="flex-1 overflow-y-auto print:overflow-visible w-full max-w-full flex flex-col">
-          <div className="p-4 md:p-10 flex-1">
+          <div className="p-4 sm:p-6 lg:p-8 flex-1">
             <Outlet />
           </div>
         </main>

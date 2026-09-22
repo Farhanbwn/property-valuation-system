@@ -35,32 +35,33 @@ const ValuationRules = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Constants */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        {/* Constants */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
           <div className="p-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-700 flex items-center">
-            <Settings className="w-4 h-4 mr-2" /> Global Constants
+            <Settings className="w-4 h-4 mr-2 text-slate-500" /> Global Constants
           </div>
-          <div className="p-4">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm text-left text-slate-600">
-              <tbody>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">Building Valuation Factor</td>
-                  <td className="py-2 font-medium text-slate-900 text-right">{rules.constants.buildingValuationFactor}</td>
+              <tbody className="divide-y divide-slate-100">
+                <tr className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 font-medium text-slate-700">Building Valuation Factor</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900 text-right">{rules.constants.buildingValuationFactor}</td>
                 </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">Bigha to Sq Ft</td>
-                  <td className="py-2 font-medium text-slate-900 text-right">{rules.constants.bighaToSqFt}</td>
+                <tr className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 font-medium text-slate-700">Bigha to Sq Ft</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900 text-right">{rules.constants.bighaToSqFt}</td>
                 </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">Khatha to Sq Ft</td>
-                  <td className="py-2 font-medium text-slate-900 text-right">{rules.constants.khathaToSqFt}</td>
+                <tr className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 font-medium text-slate-700">Khatha to Sq Ft</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900 text-right">{rules.constants.khathaToSqFt}</td>
                 </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">Minimum Valuation</td>
-                  <td className="py-2 font-medium text-slate-900 text-right">₹{rules.constants.minimumValuation}</td>
+                <tr className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 font-medium text-slate-700">Minimum Valuation</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900 text-right">₹{rules.constants.minimumValuation}</td>
                 </tr>
-                <tr>
-                  <td className="py-2">Commercial Surcharge %</td>
-                  <td className="py-2 font-medium text-slate-900 text-right">{rules.constants.commercialSurchargePercent}%</td>
+                <tr className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 font-medium text-slate-700">Commercial Surcharge %</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900 text-right">{rules.constants.commercialSurchargePercent}%</td>
                 </tr>
               </tbody>
             </table>
@@ -68,25 +69,32 @@ const ValuationRules = () => {
         </div>
 
         {/* Scores */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-700">
-            Score Values
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+          <div className="p-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between">
+            <span>Score Values</span>
+            <span className="text-xs font-normal text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full">
+              {rules.scoreLookup.length} scores
+            </span>
           </div>
-          <div className="p-4 h-64 overflow-y-auto">
-            <table className="w-full text-sm text-left text-slate-600">
-              <thead className="sticky top-0 bg-white">
+          <div className="overflow-y-auto max-h-[320px]">
+            <table className="w-full text-sm text-left text-slate-600 border-collapse">
+              <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10 shadow-xs">
                 <tr>
-                  <th className="py-2 font-semibold text-slate-900">Code</th>
-                  <th className="py-2 font-semibold text-slate-900">Type</th>
-                  <th className="py-2 font-semibold text-slate-900 text-right">Value</th>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 bg-slate-50">Code</th>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 bg-slate-50">Type</th>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 text-right bg-slate-50">Value</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {rules.scoreLookup.map((s: any) => (
-                  <tr key={s.code}>
-                    <td className="py-2 font-medium">{s.code}</td>
-                    <td className="py-2 text-xs uppercase tracking-wider text-slate-500">{s.type}</td>
-                    <td className="py-2 font-medium text-slate-900 text-right">{s.value}</td>
+                  <tr key={s.code} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-2.5 px-4 font-medium text-slate-900">{s.code}</td>
+                    <td className="py-2.5 px-4">
+                      <span className="bg-slate-100 text-slate-600 text-xs font-medium px-2 py-0.5 rounded uppercase tracking-wider">
+                        {s.type}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-4 font-semibold text-slate-900 text-right">{s.value}</td>
                   </tr>
                 ))}
               </tbody>

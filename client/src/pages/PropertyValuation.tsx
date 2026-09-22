@@ -503,7 +503,7 @@ const PropertyValuation = () => {
       </div>
 
       {/* RIGHT: LIVE CALCULATION */}
-      <div className="w-full lg:w-96 space-y-6 shrink-0">
+      <div className="w-full lg:w-80 xl:w-96 space-y-6 shrink-0">
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden sticky top-6">
           <div className="bg-slate-900 p-4 text-white flex items-center justify-between">
             <h2 className="font-semibold flex items-center">

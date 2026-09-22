@@ -198,6 +198,7 @@ const ValuationReport = () => {
                   <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Date</th>
                   <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Name</th>
                   <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Ward</th>
+                  <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Mouza</th>
                   <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Location</th>
                   <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Holding No</th>
                   <th className="px-4 py-3 font-semibold print:px-2 print:py-2">Type</th>
@@ -209,7 +210,7 @@ const ValuationReport = () => {
               <tbody className="divide-y divide-slate-100 print:divide-slate-300">
                 {records.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="px-6 py-10 text-center text-slate-500">
+                    <td colSpan={13} className="px-6 py-10 text-center text-slate-500">
                       No records found for the selected criteria.
                     </td>
                   </tr>
@@ -228,6 +229,7 @@ const ValuationReport = () => {
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{formatDate(r.createdAt)}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5 font-medium">{r.property?.ownerName || '-'}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{r.property?.ward || '-'}</td>
+                        <td className="px-4 py-3 print:px-2 print:py-1.5">{r.property?.mouza || '-'}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{r.property?.location || '-'}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5">{r.property?.holdingNumber || '-'}</td>
                         <td className="px-4 py-3 print:px-2 print:py-1.5 font-semibold text-slate-600">
